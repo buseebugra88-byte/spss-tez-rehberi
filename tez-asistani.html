@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Multifidus Tez Asistanı</title>
-<link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="theme-color" content="#1b3436">
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-tez-192.png"><meta name="theme-color" content="#1b3436">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExNiIgZmlsbD0iIzFiMzQzNiIvPjxwYXRoIGQ9Ik0xNTAgMTI4IEMxMTIgMTk2IDExMiAzMTYgMTUwIDM4OCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMmM3ZDgwIiBzdHJva2Utd2lkdGg9IjI2IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMzYyIDEyOCBDNDAwIDE5NiA0MDAgMzE2IDM2MiAzODgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzJjN2Q4MCIgc3Ryb2tlLXdpZHRoPSIyNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PHBhdGggZD0iTTE4OCAxNTAgQzE2MiAyMTQgMTYyIDMwMCAxODggMzY0IiBmaWxsPSJub25lIiBzdHJva2U9IiNlOGEzNWEiIHN0cm9rZS13aWR0aD0iMjAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxwYXRoIGQ9Ik0zMjQgMTUwIEMzNTAgMjE0IDM1MCAzMDAgMzI0IDM2NCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZThhMzVhIiBzdHJva2Utd2lkdGg9IjIwIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cmVjdCB4PSIyMDYiIHk9IjEwOCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSI3MCIgcng9IjI0IiBmaWxsPSIjZjZmNGVmIi8+PHJlY3QgeD0iMjA2IiB5PSIxOTYiIHdpZHRoPSIxMDAiIGhlaWdodD0iNzAiIHJ4PSIyNCIgZmlsbD0iI2Y2ZjRlZiIvPjxyZWN0IHg9IjIwNiIgeT0iMjg0IiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjcwIiByeD0iMjQiIGZpbGw9IiNmNmY0ZWYiLz48cmVjdCB4PSIyMjYiIHk9IjM3MiIgd2lkdGg9IjYwIiBoZWlnaHQ9IjQ0IiByeD0iMTgiIGZpbGw9IiNmNmY0ZWYiIG9wYWNpdHk9Ii41NSIvPjxwYXRoIGQ9Ik00MTIgNzAgbDEwIDI2IDI2IDEwIC0yNiAxMCAtMTAgMjYgLTEwIC0yNiAtMjYgLTEwIDI2IC0xMHoiIGZpbGw9IiNlOGEzNWEiLz48L3N2Zz4=">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -378,6 +379,7 @@ const ST = (() => {
 })();
 
 
+const LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="116" fill="#1b3436"/><path d="M150 128 C112 196 112 316 150 388" fill="none" stroke="#2c7d80" stroke-width="26" stroke-linecap="round"/><path d="M362 128 C400 196 400 316 362 388" fill="none" stroke="#2c7d80" stroke-width="26" stroke-linecap="round"/><path d="M188 150 C162 214 162 300 188 364" fill="none" stroke="#e8a35a" stroke-width="20" stroke-linecap="round"/><path d="M324 150 C350 214 350 300 324 364" fill="none" stroke="#e8a35a" stroke-width="20" stroke-linecap="round"/><rect x="206" y="108" width="100" height="70" rx="24" fill="#f6f4ef"/><rect x="206" y="196" width="100" height="70" rx="24" fill="#f6f4ef"/><rect x="206" y="284" width="100" height="70" rx="24" fill="#f6f4ef"/><rect x="226" y="372" width="60" height="44" rx="18" fill="#f6f4ef" opacity=".55"/><path d="M412 70 l10 26 26 10 -26 10 -10 26 -10 -26 -26 -10 26 -10z" fill="#e8a35a"/></svg>';
 /* ===== Çekirdek: durum, yardımcılar, yönlendirme ===== */
 const KEY = 'lmTezAsistani.v1';
 const TP = { T0: 'Başlangıç', T4: '4. hafta', T8: '8. hafta' };
@@ -538,7 +540,7 @@ function render() {
   const r = route(); const fn = VIEWS[r.v] || VIEWS.panel; let html;
   try { html = fn(r); } catch (e) { console.error(e); html = `<div class="card"><h3>Bir hata oldu</h3><pre class="code">${h(e.stack || e)}</pre></div>`; }
   const navHtml = NAV.map(n => n[0] === 'sec' ? `<div class="sec">${n[1]}</div>` : `<a href="#${n[0]}" class="${(r.v === n[0] || (r.v === 'katilimci' && n[0] === 'katilimcilar')) ? 'on' : ''}"><i>${n[1]}</i>${n[2]}</a>`).join('');
-  document.getElementById('app').innerHTML = `<aside class="side"><div class="brand">Multifidus Tez Asistanı<small>Derin öğrenme LM analizi · Fenotip temelli egzersiz</small></div><nav class="nav">${navHtml}</nav></aside><main class="main">${html}</main>
+  document.getElementById('app').innerHTML = `<aside class="side"><div class="brand"><div style="display:flex;gap:10px;align-items:center"><span style="width:38px;height:38px;flex:none" aria-hidden="true">${LOGO_SVG}</span><span>Multifidus Tez Asistanı</span></div><small>Derin öğrenme LM analizi · Fenotip temelli egzersiz</small></div><nav class="nav">${navHtml}</nav></aside><main class="main">${html}</main>
   <nav class="mnav">${NAV.filter(n => n[0] !== 'sec').map(n => `<a href="#${n[0]}" class="${r.v === n[0] ? 'on' : ''}"><i>${n[1]}</i>${n[3]}</a>`).join('')}</nav>`;
   if (AFTER.length) { const a = AFTER.splice(0); a.forEach(fn => { try { fn(); } catch (e) { console.error(e); } }); }
 }
@@ -2109,6 +2111,10 @@ function auStr(a, style) { const fam = a.family || a.name || ''; const giv = (a.
 function fmtRef(r, style) {
   if (r.diger && r.ham) return h(r.ham);
   const A = r.authors || []; const pg = r.pages ? r.pages.replace(/--?/, '-') : '';
+  if (style === 'tubitak') {
+    const au = A.map(a => { const giv = (a.given || '').split(/[\s.-]+/).filter(Boolean); return `${a.family || ''}${giv.length ? ', ' + giv.map(g => g[0].toUpperCase() + '.').join(' ') : ''}`; }).join(', ');
+    return `${h(au)} ${h(r.year || '')}${h(r.yilEk || '')}. “${h(String(r.title || '').replace(/[.]$/, ''))}”, ${h(r.journal || r.jabbr || '')}${r.volume ? ', ' + h(r.volume) : ''}${r.issue ? `(${h(r.issue)})` : ''}${pg ? ', ' + h(pg.replace('-', '–')) : ''}.${r.doi ? ` https://doi.org/${h(r.doi)}` : ''}`;
+  }
   if (style === 'apa') {
     let au = A.length === 0 ? '' : A.length === 1 ? auStr(A[0], 'apa') : A.length <= 20 ? A.slice(0, -1).map(a => auStr(a, 'apa')).join(', ') + ', & ' + auStr(A[A.length - 1], 'apa') : A.slice(0, 19).map(a => auStr(a, 'apa')).join(', ') + ', … ' + auStr(A[A.length - 1], 'apa');
     return `${au} (${r.year || 't.y.'}). ${r.title}${/[.?!]$/.test(r.title) ? '' : '.'} <i>${h(r.journal || '')}</i>${r.volume ? `, <i>${h(r.volume)}</i>` : ''}${r.issue ? `(${h(r.issue)})` : ''}${pg ? `, ${pg.replace('-', '–')}` : ''}.${r.doi ? ` https://doi.org/${h(r.doi)}` : ''}`;
@@ -2136,11 +2142,12 @@ function addRefs(list) { S.refs = S.refs || []; let n = 0, dup = 0; list.forEach
 VIEWS.kaynakca = () => {
   const R = S.refs = S.refs || []; const st = UI.kStil; const q = (UI.kq || '').toLowerCase(); const tags = [...new Set(R.map(r => r.etiket).filter(Boolean))];
   const list = R.map((r, i) => [r, i]).filter(([r]) => (!q || (r.title + (r.authors || []).map(a => a.family).join(' ') + (r.year || '')).toLowerCase().includes(q)) && (!UI.kTag || r.etiket === UI.kTag));
-  const full = R.map((r, i) => `${st === 'vancouver' ? (i + 1) + '. ' : ''}${fmtRef(r, st)}`);
-  const html = `<ol style="font-family:'Times New Roman';font-size:12pt">${R.map(r => `<li>${fmtRef(r, st)}</li>`).join('')}</ol>`; const htmlApa = `<div style="font-family:'Times New Roman';font-size:12pt">${R.slice().sort((a, b) => auStr(a.authors?.[0] || {}, 'apa').localeCompare(auStr(b.authors?.[0] || {}, 'apa'), 'tr')).map(r => `<p style="padding-left:1.27cm;text-indent:-1.27cm">${fmtRef(r, 'apa')}</p>`).join('')}</div>`;
+  const alfa = arr => { const s = arr.slice().sort((a, b) => ((a.authors?.[0]?.family || a.title || '') + (a.year || '')).localeCompare((b.authors?.[0]?.family || b.title || '') + (b.year || ''), 'tr')); const seen = {}; s.forEach(r => { const k = (r.authors?.[0]?.family || '') + '|' + r.year; seen[k] = (seen[k] || 0) + 1; }); const cnt = {}; return s.map(r => { const k = (r.authors?.[0]?.family || '') + '|' + r.year; if (seen[k] > 1) { cnt[k] = (cnt[k] || 0) + 1; return { ...r, yilEk: 'abcdefgh'[cnt[k] - 1] }; } return r; }); };
+  const full = (st === 'vancouver' ? R : alfa(R)).map((r, i) => `${st === 'vancouver' ? (i + 1) + '. ' : ''}${fmtRef(r, st)}`);
+  const html = `<ol style="font-family:'Times New Roman';font-size:12pt">${R.map(r => `<li>${fmtRef(r, st)}</li>`).join('')}</ol>`; const htmlApa = `<div style="font-family:'Times New Roman';font-size:12pt">${alfa(R).map(r => `<p style="padding-left:1.27cm;text-indent:-1.27cm">${fmtRef(r, st)}</p>`).join('')}</div>`;
   UI.ktab = UI.ktab || 'liste'; const tabsK = tabs('ktab', [['liste', 'Kaynak listesi'], ['denetim', 'Atıf ve biçim denetimi']]);
   if (UI.ktab === 'denetim') return `<div class="top"><div><h1>Kaynakça</h1><p>Kurula ya da enstitüye göndermeden önce son kontrol</p></div></div>${tabsK}${kaynakDenetim()}`;
-  return `<div class="top"><div><h1>Kaynakça</h1><p>${R.length} kaynak · sıra = metindeki ilk atıf sırası (Vancouver)</p></div><div class="row"><select data-chg="aSet" data-k="kStil"><option value="vancouver" ${st === 'vancouver' ? 'selected' : ''}>Vancouver (numaralı)</option><option value="apa" ${st === 'apa' ? 'selected' : ''}>APA 7</option></select>${R.length ? clipBtn(stripTags(full.join('\n')), st === 'apa' ? htmlApa : html, 'Kaynakçayı Word\'e kopyala') : ''}</div></div>${tabsK}
+  return `<div class="top"><div><h1>Kaynakça</h1><p>${R.length} kaynak · sıra = metindeki ilk atıf sırası (Vancouver)</p></div><div class="row"><select data-chg="aSet" data-k="kStil"><option value="vancouver" ${st === 'vancouver' ? 'selected' : ''}>Vancouver (numaralı)</option><option value="apa" ${st === 'apa' ? 'selected' : ''}>APA 7</option><option value="tubitak" ${st === 'tubitak' ? 'selected' : ''}>TÜBİTAK (1001 EK-1)</option></select>${R.length ? clipBtn(stripTags(full.join('\n')), st !== 'vancouver' ? htmlApa : html, 'Kaynakçayı Word\'e kopyala') : ''}</div></div>${tabsK}
   <div class="grid g2"><div class="card"><h3>Kaynak ekle</h3><div class="row"><input id="kId" placeholder="DOI ya da PubMed numarası (PMID)" style="flex:1"><button class="btn p" data-act="kLook">Bul</button></div>
   <p class="small muted" style="margin:6px 0">Otomatik bulma internet ister ve claude.ai görünümünde engelli olabilir; GitHub sürümünde çalışır. Her yerde çalışan yol: PubMed'de <b>Cite › Download .nbib</b> ya da Zotero/Mendeley'den <b>RIS</b> dışa aktarımı.</p>
   <div class="row"><button class="btn" data-act="kFile">⇧ .nbib / .ris dosyası</button><button class="btn" data-act="kNumList">Numaralı liste yapıştır</button><button class="btn" data-act="kPaste">RIS/nbib yapıştır</button><button class="btn" data-act="kManual">Elle gir</button><label class="f" style="flex-direction:row;align-items:center;gap:6px">Etiket<input value="${h(UI.kEt || '')}" data-chg="aSet" data-k="kEt" placeholder="Giriş, Yöntem…" style="width:120px"></label></div></div>
