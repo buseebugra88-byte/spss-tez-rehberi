@@ -2263,7 +2263,8 @@ const DRV_FOLDER = 'Multifidus Tez Asistanı';
 const DRV_MAIN = 'multifidus_tez_veri.json';
 const DRV_KEY = 'lmTezAsistani.drive';
 
-function drvCfg() { try { return JSON.parse(localStorage.getItem(DRV_KEY) || '{}'); } catch (e) { return {}; } }
+const DRV_DEFAULT_CID = '903526658419-qb7ej2m8nutc9t0jvr4edt2u6blanciu.apps.googleusercontent.com';
+function drvCfg() { let c = {}; try { c = JSON.parse(localStorage.getItem(DRV_KEY) || '{}'); } catch (e) { } if (!c.clientId) c.clientId = DRV_DEFAULT_CID; return c; }
 function drvSetCfg(o) { const c = Object.assign(drvCfg(), o); try { localStorage.setItem(DRV_KEY, JSON.stringify(c)); } catch (e) { } return c; }
 function drvOrigin() { return location.protocol.startsWith('http') ? location.origin : '(dosyadan açıldı – GitHub Pages adresinden aç)'; }
 function drvOk() { return DRV.token && Date.now() < DRV.exp - 60000; }
