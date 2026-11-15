@@ -963,7 +963,7 @@ function f1LC() {
   <svg id="lcChart" class="chart" viewBox="0 0 520 280"></svg>
   ${plato ? `<div class="note">Plato eğilimi: <b>${plato} bağımsız katılımcıdan</b> sonra iki ardışık basamakta Dice artışı &lt; ${th}.</div>` : L.length >= 3 ? `<div class="note w">Henüz plato yok (eşik ${th}). Katılımcı eklemeye devam.</div>` : ''}</div>
   <div class="card"><h3>Basamak ekle</h3><div class="form"><label class="f">Bağımsız katılımcı sayısı<input id="lcN" inputmode="numeric"></label><label class="f">Ortalama Dice<input id="lcD" inputmode="decimal" placeholder="0,87"></label><label class="f">SS<input id="lcS" inputmode="decimal"></label><label class="f">Not<input id="lcT"></label></div>
-  <div class="row" style="margin-top:8px"><button class="btn p" data-act="lcAdd">Ekle</button>${inp(null, 'ayar.plato', 'Plato eşiği (ΔDice)', { num: true, rr: true })}</div>
+  <div class="row" style="margin-top:8px"><button class="btn p" data-act="lcAdd">Ekle</button><button class="btn" data-act="lcCSV">⇧ ogrenme_egrisi.csv</button>${inp(null, 'ayar.plato', 'Plato eşiği (ΔDice)', { num: true, rr: true })}</div>
   ${tableHTML(['n', 'Dice', 'SS', 'Δ', 'Not', ''], rows)}</div></div>`;
 }
 ACT.lcAdd = () => { const n = num(document.getElementById('lcN').value), d = num(document.getElementById('lcD').value); if (!isN(n) || !isN(d)) { toast('n ve Dice gerekli'); return; } S.lc.push({ n, dice: d, sd: num(document.getElementById('lcS').value), not: document.getElementById('lcT').value }); S.lc.sort((a, b) => a.n - b.n); save(); render(); };
@@ -1024,6 +1024,8 @@ function f2Budget() {
   ${tableHTML(['Kalem', 'Planlanan', 'Harcanan', 'Kalan'], [...rows, `<tr><td><b>Toplam</b></td><td class="n"><b>${f(tp, 2)} ₺</b></td><td class="n"><b>${f(th, 2)} ₺</b></td><td class="n"><b>${f(tp - th, 2)} ₺</b></td></tr>`])}</div>`;
 }
 ACT.bSet = el => { S.butce[+el.dataset.i].h = num(el.value) || 0; save(); rerender(); };
+
+ACT.lcCSV = () => pickFile('.csv,text/csv', async fl => { const rows = parseCSV(await readText(fl)); let n = 0; rows.forEach(r => { const k = num(r.n), d = num(r.dice); if (!isN(k) || !isN(d)) return; S.lc = S.lc.filter(x => x.n !== k); S.lc.push({ n: k, dice: d, sd: num(r.sd), not: 'Python' }); n++; }); S.lc.sort((a, b) => a.n - b.n); save(); toast(n + ' basamak içe aktarıldı'); render(); });
 
 /* ===== Görüntü ölçümü (ROI) ve segmentasyon metrikleri ===== */
 const ROI = { pid: null, tp: 'T0', rater: 'R1', cond: 'ist', file: '', img: null, data: null, w: 0, h: 0, zoom: 1, mode: 'R', poly: { R: [], L: [] }, closed: { R: false, L: false }, cal: [], pxmm: null, res: null, drawing: false };
