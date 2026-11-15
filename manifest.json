@@ -1,11 +1,11 @@
 {
-  "name": "SPSS Tez Rehberi",
-  "short_name": "SPSS Rehberi",
-  "start_url": "./SPSS-Tez-Rehberi-Claudesuz.html",
+  "name": "Multifidus Tez Asistanı",
+  "short_name": "Tez Asistanı",
+  "start_url": "./tez-asistani.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f3f5fb",
-  "theme_color": "#4a63d3",
+  "background_color": "#f6f4ef",
+  "theme_color": "#1b3436",
   "lang": "tr",
   "icons": [
     {
