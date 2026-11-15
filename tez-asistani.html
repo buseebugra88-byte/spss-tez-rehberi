@@ -2107,6 +2107,7 @@ ACT.figDL = el => {
 UI.kStil = UI.kStil || 'vancouver';
 function auStr(a, style) { const fam = a.family || a.name || ''; const giv = (a.given || '').split(/[\s.-]+/).filter(Boolean); return style === 'apa' ? (giv.length ? `${fam}, ${giv.map(g => g[0].toUpperCase() + '.').join(' ')}` : fam) : `${fam}${giv.length ? ' ' + giv.map(g => g[0].toUpperCase()).join('') : ''}`; }
 function fmtRef(r, style) {
+  if (r.diger && r.ham) return h(r.ham);
   const A = r.authors || []; const pg = r.pages ? r.pages.replace(/--?/, '-') : '';
   if (style === 'apa') {
     let au = A.length === 0 ? '' : A.length === 1 ? auStr(A[0], 'apa') : A.length <= 20 ? A.slice(0, -1).map(a => auStr(a, 'apa')).join(', ') + ', & ' + auStr(A[A.length - 1], 'apa') : A.slice(0, 19).map(a => auStr(a, 'apa')).join(', ') + ', … ' + auStr(A[A.length - 1], 'apa');
@@ -2137,10 +2138,12 @@ VIEWS.kaynakca = () => {
   const list = R.map((r, i) => [r, i]).filter(([r]) => (!q || (r.title + (r.authors || []).map(a => a.family).join(' ') + (r.year || '')).toLowerCase().includes(q)) && (!UI.kTag || r.etiket === UI.kTag));
   const full = R.map((r, i) => `${st === 'vancouver' ? (i + 1) + '. ' : ''}${fmtRef(r, st)}`);
   const html = `<ol style="font-family:'Times New Roman';font-size:12pt">${R.map(r => `<li>${fmtRef(r, st)}</li>`).join('')}</ol>`; const htmlApa = `<div style="font-family:'Times New Roman';font-size:12pt">${R.slice().sort((a, b) => auStr(a.authors?.[0] || {}, 'apa').localeCompare(auStr(b.authors?.[0] || {}, 'apa'), 'tr')).map(r => `<p style="padding-left:1.27cm;text-indent:-1.27cm">${fmtRef(r, 'apa')}</p>`).join('')}</div>`;
-  return `<div class="top"><div><h1>Kaynakça</h1><p>${R.length} kaynak · sıra = metindeki ilk atıf sırası (Vancouver)</p></div><div class="row"><select data-chg="aSet" data-k="kStil"><option value="vancouver" ${st === 'vancouver' ? 'selected' : ''}>Vancouver (numaralı)</option><option value="apa" ${st === 'apa' ? 'selected' : ''}>APA 7</option></select>${R.length ? clipBtn(stripTags(full.join('\n')), st === 'apa' ? htmlApa : html, 'Kaynakçayı Word\'e kopyala') : ''}</div></div>
+  UI.ktab = UI.ktab || 'liste'; const tabsK = tabs('ktab', [['liste', 'Kaynak listesi'], ['denetim', 'Atıf ve biçim denetimi']]);
+  if (UI.ktab === 'denetim') return `<div class="top"><div><h1>Kaynakça</h1><p>Kurula ya da enstitüye göndermeden önce son kontrol</p></div></div>${tabsK}${kaynakDenetim()}`;
+  return `<div class="top"><div><h1>Kaynakça</h1><p>${R.length} kaynak · sıra = metindeki ilk atıf sırası (Vancouver)</p></div><div class="row"><select data-chg="aSet" data-k="kStil"><option value="vancouver" ${st === 'vancouver' ? 'selected' : ''}>Vancouver (numaralı)</option><option value="apa" ${st === 'apa' ? 'selected' : ''}>APA 7</option></select>${R.length ? clipBtn(stripTags(full.join('\n')), st === 'apa' ? htmlApa : html, 'Kaynakçayı Word\'e kopyala') : ''}</div></div>${tabsK}
   <div class="grid g2"><div class="card"><h3>Kaynak ekle</h3><div class="row"><input id="kId" placeholder="DOI ya da PubMed numarası (PMID)" style="flex:1"><button class="btn p" data-act="kLook">Bul</button></div>
   <p class="small muted" style="margin:6px 0">Otomatik bulma internet ister ve claude.ai görünümünde engelli olabilir; GitHub sürümünde çalışır. Her yerde çalışan yol: PubMed'de <b>Cite › Download .nbib</b> ya da Zotero/Mendeley'den <b>RIS</b> dışa aktarımı.</p>
-  <div class="row"><button class="btn" data-act="kFile">⇧ .nbib / .ris dosyası</button><button class="btn" data-act="kPaste">Metin yapıştır</button><button class="btn" data-act="kManual">Elle gir</button><label class="f" style="flex-direction:row;align-items:center;gap:6px">Etiket<input value="${h(UI.kEt || '')}" data-chg="aSet" data-k="kEt" placeholder="Giriş, Yöntem…" style="width:120px"></label></div></div>
+  <div class="row"><button class="btn" data-act="kFile">⇧ .nbib / .ris dosyası</button><button class="btn" data-act="kNumList">Numaralı liste yapıştır</button><button class="btn" data-act="kPaste">RIS/nbib yapıştır</button><button class="btn" data-act="kManual">Elle gir</button><label class="f" style="flex-direction:row;align-items:center;gap:6px">Etiket<input value="${h(UI.kEt || '')}" data-chg="aSet" data-k="kEt" placeholder="Giriş, Yöntem…" style="width:120px"></label></div></div>
   <div class="card"><h3>Hacettepe tez yazımı için</h3><ul class="small"><li>Enstitü yönergesindeki kaynak stilini (genellikle numaralı / Vancouver) danışmanınla teyit et.</li><li>Metinde atıf sırası = listedeki sıra. Yeni bir kaynağı metinde öne aldıysan ↑ ile yukarı taşı; numaralar kendiliğinden güncellenir.</li><li>"(n)" düğmesi metne yapıştıracağın atıf numarasını kopyalar.</li><li>Etik başvurundaki kaynakları RIS/nbib ile bir kez içe aktarırsan tez boyunca hazır olur.</li></ul></div></div>
   <div class="card"><div class="row" style="margin-bottom:10px"><input placeholder="Ara: yazar, başlık, yıl" value="${h(UI.kq || '')}" data-inp="kSearch" style="max-width:260px">${tags.length ? `<button class="btn sm ${!UI.kTag ? 'p' : ''}" data-act="kTag" data-v="">Hepsi</button>${tags.map(t => `<button class="btn sm ${UI.kTag === t ? 'p' : ''}" data-act="kTag" data-v="${h(t)}">${h(t)}</button>`).join('')}` : ''}</div>
   ${list.length ? list.map(([r, i]) => `<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line2)"><div style="min-width:28px;font-family:var(--f-head);font-size:18px;color:var(--acc)">${i + 1}</div><div style="flex:1"><div style="font-size:13.5px">${fmtRef(r, st)}</div><div class="row small" style="margin-top:4px">${r.etiket ? `<span class="tag">${h(r.etiket)}</span>` : ''}${r.pmid ? `<span class="muted">PMID ${h(r.pmid)}</span>` : ''}<span class="sp"></span><button class="btn sm" data-act="kCite" data-i="${i}">(${i + 1})</button><button class="btn sm" data-act="kMv" data-i="${i}" data-d="-1">↑</button><button class="btn sm" data-act="kMv" data-i="${i}" data-d="1">↓</button><button class="btn sm" data-act="kEdit" data-i="${i}">Düzenle</button><button class="btn sm d" data-act="kDel" data-i="${i}">✕</button></div></div></div>`).join('') : '<p class="muted">Henüz kaynak yok.</p>'}
@@ -2168,6 +2171,79 @@ function codebookCard() {
   return `<div class="card"><div class="row"><h3 style="margin:0">Değişken sözlüğü (codebook)</h3><span class="sp"></span><select data-chg="aSet" data-k="cbk">${Object.entries(DATASETS).map(([k, d]) => `<option value="${k}" ${UI.cbk === k ? 'selected' : ''}>${d[0]}</option>`).join('')}</select>${clipBtn(plainOf(tbl), wordTable(tbl), 'Word\'e kopyala')}<button class="btn sm" data-act="cbDL">⇩ CSV</button></div><p class="small muted">Tez ekine ve Cemil Hoca'ya: SPSS'teki her değişkenin anlamı ve kodları. Eksik değerler boş hücredir (SPSS'te sistem eksiği).</p><div class="tbl" style="margin-top:10px">${tbl}</div></div>`;
 }
 ACT.cbDL = () => downloadFile(`degisken_sozlugu_${UI.cbk}.csv`, toCSV(codebook(UI.cbk), ['ad', 'etiket', 'tur', 'duzey', 'degerler']), 'text/csv');
+
+/* ===== Kaynakça: numaralı liste içe aktarma, atıf denetimi, Vancouver biçim denetimi ===== */
+const VREF_RX = new RegExp(String.raw`(?:^|[.?!]\s+)([^.?!]+?(?:\([^)]*\))?)\.\s*((?:19|20)\d{2})(?:\s+[A-Z][a-z]{2}(?:\s\d{1,2})?)?\s*;\s*([^:(.;]*)(?:\(([^)]*)\))?\s*:?\s*([^.]*)\.?`, 'g');
+function parseVancouverLine(line) {
+  const raw = line.replace(/^\s*\[?\d{1,3}[.)\]]\s*/, '').replace(/\\/g, '').trim(); if (!raw) return null;
+  const r = { ham: raw, authors: [] };
+  const a = raw.match(/^(.+?)\.\s+(.*)$/); if (!a) return { ...r, title: raw };
+  const auPart = a[1]; let rest = a[2];
+  r.authors = auPart.split(/,\s*/).filter(x => x && !/^et al/i.test(x)).map(x => { const m = x.trim().match(/^(.*)\s+([A-ZÇĞİÖŞÜ][A-Za-z-]{0,3})$/); return m ? { family: m[1], given: m[2].split('').filter(c => c !== '-').join(' ') } : { family: x.trim(), given: '' }; });
+  r.etal = /et al/i.test(auPart);
+  const jm = [...rest.matchAll(VREF_RX)].pop();
+  if (jm) { const jStart = rest.lastIndexOf(jm[1] + '.'); r.title = rest.slice(0, jStart).replace(/[\s.]+$/, '').trim(); if (!/[?!]$/.test(r.title)) r.title += ''; r.jabbr = jm[1].trim(); r.year = jm[2]; r.volume = jm[3].trim(); r.issue = (jm[4] || '').trim(); r.pages = (jm[5] || '').trim(); const d = raw.match(/doi:\s*(\S+?)\.?$/i); if (d) r.doi = d[1]; }
+  else { r.title = rest; r.diger = true; }
+  return r;
+}
+function parseNumberedList(txt) { const out = []; for (const l0 of txt.split(/\r?\n/)) { const l = l0.trim().replace(/\\/g, ''); const m = l.match(/^\[?(\d{1,3})[.)\]]\s+\S/); if (!m) continue; if (+m[1] !== out.length + 1) { if (out.length) break; else continue; } const r = parseVancouverLine(l); if (r) out.push(r); } return out; }
+function vancouverIssues(r, i, all) {
+  const t = r.ham || stripTags(fmtRef(r, 'vancouver')); const iss = [];
+  const n = (r.authors || []).length;
+  if (n > 6 && !r.etal) iss.push(`${n} yazar yazılmış: Vancouver'da ilk 6 yazar + "et al."`);
+  if (r.etal && n !== 6) iss.push(`"et al." öncesi ${n} yazar var: makalenin 6 ya da daha az yazarı varsa hepsini yaz; 6'dan fazlaysa ilk 6'yı yazıp "et al." ekle`);
+  if (/&| and /.test((t.split('. ')[0] || ''))) iss.push('Yazarlar arasında "&" ya da "and" var; yalnızca virgül kullanılır');
+  if (/\((19|20)\d{2}\)/.test(t)) iss.push('Yıl parantez içinde (APA biçimi kalmış)');
+  if (/\*|<i>/.test(t)) iss.push('İtalik/yıldız işareti kalmış (APA biçimi)');
+  if ((r.authors || []).some(a => /\./.test(a.given || '') || /\./.test(a.family))) iss.push('Yazar baş harflerinde nokta var (Vancouver: Smith AB)');
+  if (!r.diger) { if (!r.year) iss.push('Yıl eksik'); if (!r.volume) iss.push('Cilt eksik'); if (!r.pages) iss.push('Sayfa / makale numarası eksik'); if (r.jabbr && /\b(Journal|International|American|Research|Medicine)\b/.test(r.jabbr) && r.jabbr.split(' ').length > 3) iss.push(`Dergi adı kısaltılmamış olabilir: "${r.jabbr}" (NLM kısaltmasını kullan)`); }
+  if (r.pages && /^\d+-\d+$/.test(r.pages) && all.some(x => /\d–\d/.test(x.pages || ''))) iss.push('Sayfa aralığında kısa tire (-); listenin geri kalanında uzun tire (–) kullanılmış');
+  if (r.jabbr === 'Spine' && all.some(x => /Phila Pa/.test(x.jabbr || ''))) iss.push('Dergi adı tutarsız: listede hem "Spine" hem "Spine (Phila Pa 1976)" var');
+  const key = (r.doi || '').toLowerCase() || (r.title || '').toLowerCase().slice(0, 50); const dup = all.findIndex((x, j) => j !== i && ((x.doi || '').toLowerCase() || (x.title || '').toLowerCase().slice(0, 50)) === key); if (key && dup >= 0 && dup < i) iss.push(`${dup + 1}. kaynakla aynı (tekrar)`);
+  return iss;
+}
+function citationAudit(text, N) {
+  const out = { order: [], cites: [], viol: [], missing: [], unused: [], authorYear: [], veArk: [] };
+  const re = /[([](\s*\d{1,3}(?:\s*[-–]\s*\d{1,3})?(?:\s*[,;]\s*\d{1,3}(?:\s*[-–]\s*\d{1,3})?)*\s*)[)\]]/g; let m;
+  while ((m = re.exec(text))) {
+    const pre = text.slice(Math.max(0, m.index - 8), m.index); if (/[\d*]$/.test(pre) || /(beş|bir|iki|üç|dört|five)\s*$/i.test(pre)) continue;
+    const ns = []; m[1].split(/[,;]/).forEach(p => { p = p.trim(); const rg = p.split(/\s*[-–]\s*/).map(Number); if (rg.length === 2) { if (rg[1] - rg[0] < 40 && rg[1] >= rg[0]) for (let k = rg[0]; k <= rg[1]; k++) ns.push(k); } else if (p) ns.push(+p); });
+    if (!ns.length || (N && ns.some(x => x > N + 20)) || ns.every(x => x === 0)) continue;
+    if (/0\s*[-–]\s*10/.test(m[1])) continue; // ölçek aralığı (0–10)
+    out.cites.push({ pos: m.index, txt: m[0], ns, ctx: text.slice(Math.max(0, m.index - 70), m.index + m[0].length + 10).replace(/\s+/g, ' ') });
+  }
+  const first1 = out.cites.findIndex(c => c.ns.includes(1)); if (first1 > 0) { out.atlanan = out.cites.slice(0, first1); out.cites = out.cites.slice(first1); } else out.atlanan = [];
+  let expected = 1; out.cites.forEach(c => c.ns.forEach(n => { if (out.order.includes(n)) return; out.order.push(n); if (n !== expected) out.viol.push({ n, beklenen: expected, ctx: c.ctx }); expected = out.order.length + 1; }));
+  if (N) { out.missing = out.order.filter(n => n > N || n < 1); for (let k = 1; k <= N; k++) if (!out.order.includes(k)) out.unused.push(k); }
+  const ay = /\(([A-ZÇĞİÖŞÜ][\wçğıöşüÇĞİÖŞÜ'’-]+(?:\s(?:ve ark\.|et al\.|ve|and|&)\s?[A-ZÇĞİÖŞÜ]?[\wçğıöşü'’-]*)?,?\s(?:19|20)\d{2}[a-z]?)\)/g; while ((m = ay.exec(text))) out.authorYear.push(text.slice(Math.max(0, m.index - 50), m.index + m[0].length).replace(/\s+/g, ' '));
+  const va = /([A-ZÇĞİÖŞÜ][\wçğıöşü'’-]+ ve ark\.)/g; while ((m = va.exec(text))) { const tail = text.slice(m.index, m.index + 500); const end = tail.search(/[.!?](?=\s+[A-ZÇĞİÖŞÜ])/); const sent = end > 0 ? tail.slice(0, end + 1) : tail; if (!/[([]\s*\d/.test(sent)) out.veArk.push(sent.slice(0, 110).replace(/\s+/g, ' ')); }
+  out.veArk = [...new Set(out.veArk)];
+  return out;
+}
+async function docxText(file) { if (typeof JSZip === 'undefined') throw new Error('zip'); const z = await JSZip.loadAsync(file); const xml = await z.file('word/document.xml').async('string'); return xml.replace(/<w:tab\/>/g, '\t').replace(/<\/w:p>/g, '\n').replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'"); }
+function splitBodyRefs(text) { const m = [...text.matchAll(/^\s*(?:\d+(?:\.\d+)*\.?\s*)?(KAYNAKLAR|Kaynaklar|KAYNAKÇA|Kaynakça|REFERENCES|References)\s*$/gm)].pop(); if (!m) return { body: text, refs: '' }; return { body: text.slice(0, m.index), refs: text.slice(m.index) }; }
+const AUD = { text: '', file: '', listFromDoc: [] };
+function kaynakDenetim() {
+  const R = S.refs || []; const N = AUD.listFromDoc.length || R.length; const a = AUD.text ? citationAudit(AUD.text, N) : null;
+  const listForFmt = AUD.listFromDoc.length ? AUD.listFromDoc : R; const fmtIss = listForFmt.map((r, i) => [i, vancouverIssues(r, i, listForFmt)]).filter(([, x]) => x.length);
+  const ok = a && !a.viol.length && !a.missing.length && !a.unused.length && !a.authorYear.length;
+  return `<div class="card"><h3>Atıf denetimi</h3><p class="small">Tez ya da başvuru dosyanı (.docx) yükle ya da metni yapıştır. Uygulama metindeki numaralı atıfları okur ve kurullardan en sık gelen düzeltmeleri kontrol eder: ilk geçiş sırası, listede olmayan numara, hiç atıf almayan kaynak, kalmış yazar–yıl atıfları, numarasız "ve ark." ifadeleri ve Vancouver biçimi.</p>
+  <div class="row"><button class="btn p" data-act="audDocx">⇧ .docx yükle</button><button class="btn" data-act="audPaste">Metin yapıştır</button>${AUD.text ? `<span class="small muted">${h(AUD.file || 'yapıştırılan metin')} · ${a.cites.length} atıf · ${N} kaynak ${AUD.listFromDoc.length ? '(dosyadaki listeden)' : '(uygulamadaki listeden)'}</span>` : ''}${AUD.listFromDoc.length ? `<span class="sp"></span><button class="btn sm" data-act="audImport">Dosyadaki ${AUD.listFromDoc.length} kaynağı Kaynakça'ya aktar</button>` : ''}</div></div>
+  ${a ? `<div class="grid g4" style="margin-bottom:14px">${[['Sıra hatası', a.viol.length], ['Listede olmayan numara', a.missing.length], ['Atıf almayan kaynak', a.unused.length], ['Kalan yazar–yıl atfı', a.authorYear.length]].map(([l, v]) => `<div class="kpi"><div class="l">${l}</div><div class="v" style="color:${v ? 'var(--bad)' : 'var(--ok)'}">${v}</div></div>`).join('')}</div>
+  ${a.atlanan.length ? `<div class="note w">Belgenin başında (1) numaralı atıftan önce ${a.atlanan.length} atıf var — örneğin düzeltme yazısı ya da özet. Sıra denetimi (1)'in ilk geçtiği yerden başlatıldı. Bu kısım tez metninin parçasıysa oradaki numaralar da sıra hatasıdır: ${a.atlanan.slice(0, 3).map(c => `<i>…${h(c.ctx.slice(-50))}</i>`).join(', ')}</div>` : ''}${ok ? '<div class="note">Numaralandırma tutarlı: kaynaklar metinde ilk geçiş sırasına göre numaralanmış, eksik ya da fazla kaynak yok. 👏</div>' : ''}
+  ${a.viol.length ? `<div class="card"><h3>İlk geçiş sırası bozuk</h3><p class="small">Vancouver'da kaynak numarası, metinde ilk kez geçtiği sıradır. Aşağıdaki yerlerde beklenen numara yerine başka bir numara ilk kez kullanılmış.</p>${tableHTML(['Kullanılan', 'Beklenen', 'Bağlam'], a.viol.slice(0, 40).map(v => `<tr><td class="n"><b>${v.n}</b></td><td class="n">${v.beklenen}</td><td class="small">…${h(v.ctx)}…</td></tr>`))}<div class="row" style="margin-top:8px"><button class="btn sm" data-act="audMap">Yeniden numaralandırma tablosu</button></div></div>` : ''}
+  ${a.missing.length ? `<div class="note b">Metinde geçen ama listede olmayan numaralar: <b>${a.missing.join(', ')}</b></div>` : ''}
+  ${a.unused.length ? `<div class="note w">Listede olup metinde hiç atıf almayan kaynaklar: <b>${a.unused.join(', ')}</b> — ya metinde ilgili yere ekle ya da listeden çıkar (numaralar kayar).</div>` : ''}
+  ${a.authorYear.length ? `<div class="card"><h3>Yazar–yıl biçiminde kalan atıflar</h3>${a.authorYear.slice(0, 30).map(x => `<div class="small" style="padding:4px 0;border-bottom:1px solid var(--line2)">…${h(x)}</div>`).join('')}</div>` : ''}
+  ${a.veArk.length ? `<div class="card"><h3>Numarası olmayan "ve ark." ifadeleri</h3><p class="small">Metinde yazar adı geçen cümlelerde de numara verilmeli: "Lindsay ve ark. (22)…"</p>${a.veArk.slice(0, 20).map(x => `<div class="small" style="padding:4px 0;border-bottom:1px solid var(--line2)">${h(x)}…</div>`).join('')}</div>` : ''}` : ''}
+  <div class="card"><h3>Vancouver biçim denetimi ${listForFmt.length ? `(${listForFmt.length} kaynak)` : ''}</h3>${!listForFmt.length ? '<p class="muted small">Liste yok.</p>' : fmtIss.length ? tableHTML(['No', 'Kaynak', 'Sorun'], fmtIss.map(([i, x]) => `<tr><td class="n"><b>${i + 1}</b></td><td class="small" style="max-width:420px">${h((listForFmt[i].ham || stripTags(fmtRef(listForFmt[i], 'vancouver'))).slice(0, 160))}…</td><td class="small">${x.map(h).join('<br>')}</td></tr>`)) : '<div class="note">Biçim sorunu bulunmadı.</div>'}
+  <p class="small muted" style="margin-top:8px">Biçim denetimi yazım kurallarına bakar; yazar, yıl ve sayfa bilgisinin makaleyle gerçekten uyuştuğunu doğrulamaz. Şüpheli kaynakları PubMed'de PMID ile açıp karşılaştır ya da .nbib olarak yeniden içe aktar.</p></div>`;
+}
+ACT.audDocx = () => pickFile('.docx', async fl => { try { const t = await docxText(fl); const { body, refs } = splitBodyRefs(t); AUD.text = body; AUD.file = fl.name; AUD.listFromDoc = refs ? parseNumberedList(refs) : []; render(); } catch (e) { toast(e.message === 'zip' ? 'ZIP kütüphanesi yüklenemedi (internet gerekli); metni yapıştırarak dene.' : 'Dosya okunamadı.'); } });
+ACT.audPaste = () => modal('<h3>Metni yapıştır</h3><p class="small muted">Kaynaklar bölümünü de yapıştırırsan liste oradan okunur; yoksa uygulamadaki Kaynakça kullanılır.</p><textarea id="audT" style="width:100%;height:260px"></textarea>', m => { const t = m.querySelector('#audT').value; const { body, refs } = splitBodyRefs(t); AUD.text = body; AUD.file = ''; AUD.listFromDoc = refs ? parseNumberedList(refs) : []; render(); }, 'Denetle');
+ACT.audImport = () => confirmBox(`${AUD.listFromDoc.length} kaynak, dosyadaki sırayla Kaynakça'ya eklenecek (tekrarlar atlanır).`, () => { addRefs(AUD.listFromDoc.map(r => ({ ...r, etiket: UI.kEt || 'Etik başvuru' }))); }, 'Aktar', false);
+ACT.audMap = () => { const a = citationAudit(AUD.text, AUD.listFromDoc.length || (S.refs || []).length); const rows = a.order.map((old, i) => [old, i + 1]).filter(([o, n]) => o !== n); modal(`<h3>Yeniden numaralandırma</h3><p class="small">Metindeki her eski numarayı yenisiyle değiştir ve listeyi yeni sıraya göre diz. Word'de değiştirirken çakışmayı önlemek için önce hepsini geçici bir işaretle (ör. #12#) değiştirip sonra numaraya çevir.</p>${tableHTML(['Eski', 'Yeni'], rows.map(([o, n]) => `<tr><td class="n">${o}</td><td class="n"><b>${n}</b></td></tr>`))}`); };
+ACT.kNumList = () => modal('<h3>Numaralı kaynak listesi yapıştır</h3><p class="small muted">Word\'deki "Kaynaklar" listesini olduğu gibi yapıştır (1. Yazar AB, …). Sıra korunur.</p><textarea id="nl" style="width:100%;height:260px"></textarea>', m => { const L = parseNumberedList(m.querySelector('#nl').value); if (!L.length) { toast('Numaralı satır bulunamadı.'); return false; } addRefs(L); }, 'Aktar');
 
 load(); render(); window.addEventListener('hashchange', () => { window.scrollTo(0, 0); render(); }); initCaps();
 </script></body></html>
