@@ -419,7 +419,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 const h = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const num = v => { if (v === '' || v === null || v === undefined) return null; const n = Number(String(v).replace(',', '.')); return isFinite(n) ? n : null; };
 const isN = v => typeof v === 'number' && isFinite(v);
-function f(v, d = 2) { return isN(v) ? v.toFixed(d).replace('.', ',') : '—'; }
+function f(v, d = 2) { if (!isN(v)) return '—'; if (Math.abs(v) < 0.5 * 10 ** -d) v = 0; return v.toFixed(d).replace('.', ','); }
 function fp(p) { if (!isN(p)) return '—'; return p < 0.001 ? '<0,001' : p.toFixed(3).replace('.', ','); }
 const ms = (m, s, d = 2) => isN(m) ? `${f(m, d)} ± ${f(s, d)}` : '—';
 const P = id => S.participants.find(p => p.id === id);
@@ -526,9 +526,9 @@ const EXCL = [['spesifik', 'Spesifik bel ağrısı nedeni (tümör, enfeksiyon, 
 // ---- yönlendirme ----
 const NAV = [
   ['sec', 'Genel'], ['panel', '◎', 'Pano', 'Pano'], ['asistan', '✦', 'Tez Asistanı', 'Asistan'],
-  ['sec', 'Veri toplama'], ['katilimcilar', '☰', 'Katılımcılar', 'Kişiler'], ['adlandir', '✎', 'Dosya adlandırma', 'Adlar'], ['roi', '◩', 'Görüntü ölçümü (ImageJ)', 'Ölçüm'],
+  ['sec', 'Veri toplama'], ['katilimcilar', '☰', 'Katılımcılar', 'Kişiler'], ['adlandir', '✎', 'Dosya adlandırma', 'Adlar'], ['roi', '◩', 'Görüntü ölçümü (ImageJ)', 'Ölçüm'], ['kalite', '✓', 'Veri kalitesi', 'Kalite'],
   ['sec', 'Fazlar'], ['faz1', '①', 'Faz 1 · Model & referans', 'Faz 1'], ['faz2', '②', 'Faz 2 · Fenotip & tedavi', 'Faz 2'],
-  ['sec', 'Analiz'], ['analiz', '∑', 'İstatistik (SPSS\'siz)', 'Analiz'], ['spss', '⇪', 'SPSS\'e aktar', 'SPSS'], ['rehber', '?', 'SPSS Tez Rehberi', 'Rehber'], ['rapor', '❡', 'Tez tabloları', 'Tablolar'],
+  ['sec', 'Analiz'], ['analiz', '∑', 'İstatistik (SPSS\'siz)', 'Analiz'], ['spss', '⇪', 'SPSS\'e aktar', 'SPSS'], ['rehber', '?', 'SPSS Tez Rehberi', 'Rehber'], ['rapor', '❡', 'Tez tabloları', 'Tablolar'], ['kaynakca', '❝', 'Kaynakça', 'Kaynak'],
   ['sec', 'Diğer'], ['ayarlar', '⚙', 'Ayarlar & yedek', 'Ayarlar']
 ];
 function route() { const hsh = (location.hash || '#panel').slice(1); const m = hsh.match(/^k-(.+)$/); if (m) return { v: 'katilimci', id: m[1] }; return { v: hsh || 'panel' }; }
@@ -845,7 +845,7 @@ function pSeans(p) {
   <div class="kpi"><div class="l">Devam</div><div class="v">${done}<span class="small muted">/${ex.length}</span></div><div class="s">${ex.length ? '%' + Math.round(done / ex.length * 100) : ''} ${p.rand.grup === 'EX' ? '(hedef 24 seans: 8 hf × 3)' : '(1 eğitim + 2 haftada bir kontrol)'}</div></div>
   <div class="kpi"><div class="l">Yol gideri (katılınan)</div><div class="v" style="font-size:22px">${f(yol, 0)} ₺</div></div></div>
   <div class="card"><div class="row"><h3 style="margin:0">Takvim</h3><span class="sp"></span>${inp(p.id, 'f2.baslangic', 'Müdahale başlangıcı', { type: 'date' })}<button class="btn ${ss.length ? '' : 'p'}" data-act="mkSchedule" data-pid="${p.id}">${ss.length ? 'Takvimi yeniden oluştur' : 'Takvimi oluştur'}</button><button class="btn sm" data-act="seansEkle" data-pid="${p.id}">＋ Ek seans</button><button class="btn sm" data-act="icsP" data-pid="${p.id}">📅 Takvime aktar (.ics)</button>${p.rand.grup === 'EX' ? `<button class="btn sm" data-act="cardDL" data-pid="${p.id}">🖨 Seans planı</button><button class="btn sm p" data-act="tab" data-k="ptab" data-v="program">Egzersiz programı & PDF</button>` : ''}</div>
-  ${tableHTML(['Tarih', 'Hf', 'Tür', 'Katıldı', 'Ağrı', 'Özet', ''], rows)}</div>${p.rand.grup === 'EX' ? `<div class="card"><h3>Program özeti – ${FEN[p.fenotip.onay]}</h3>${PROG[p.fenotip.onay]}</div>` : `<div class="card"><h3>Bel–boyun okulu içeriği</h3><p>Omurganın temel anatomisi; bel ve boyun ağrısının oluşum mekanizmaları; günlük yaşamda doğru postür ve ergonomi; oturma, kalkma, yük kaldırma ve eğilmede omurgayı koruyucu hareket stratejileri. Eğitim bir kez verilir, ardından 8 hafta boyunca 2 haftada bir kontrol.</p></div>`}`;
+  ${tableHTML(['Tarih', 'Hf', 'Tür', 'Katıldı', 'Ağrı', 'Özet', ''], rows)}</div>${p.rand.grup === 'EX' ? `<div class="card"><h3>Program özeti – ${FEN[p.fenotip.onay]}</h3>${PROG[p.fenotip.onay]}</div>` : `<div class="card"><h3>Bel–boyun okulu içeriği</h3><p>Omurganın temel anatomisi; bel ve boyun ağrısının oluşum mekanizmaları; günlük yaşamda doğru postür ve ergonomi; oturma, kalkma, yük kaldırma ve eğilmede omurgayı koruyucu hareket stratejileri. Eğitim bir kez verilir, ardından 8 hafta boyunca 2 haftada bir kontrol.</p></div>`}${olayCard(p)}`;
 }
 ACT.seansK = el => { const p = P(el.dataset.pid); const s = p.seans.find(x => x.id === el.dataset.sid); s.katildi = el.checked; save(); rerender(); };
 ACT.seansEkle = el => { const p = P(el.dataset.pid); p.seans.push({ id: uid(), tarih: today(), tip: p.rand.grup === 'EX' ? 'egz' : 'kontrol', katildi: false, yol: S.ayar.yolUcret || null }); p.seans.sort((a, b) => a.tarih < b.tarih ? -1 : 1); save(); render(); };
@@ -962,7 +962,7 @@ function f1LC() {
   const th = S.ayar.plato; let plato = null; for (let i = 2; i < L.length; i++) if (L[i].dice - L[i - 1].dice < th && L[i - 1].dice - L[i - 2].dice < th) { plato = L[i - 1].n; break; }
   AFTER.push(() => drawLC());
   return `<div class="grid g2"><div class="card"><h3>Öğrenme eğrisi</h3><p class="small">Her basamakta aynı mimari ve aynı doğrulama koşulları ile eğitilen modelin ortalama Dice'ı (5-kat CV). Marjinal kazanç ardışık iki basamakta eşiğin altına düşünce veri seti yeterli kabul edilir.</p>
-  <svg id="lcChart" class="chart" viewBox="0 0 520 280"></svg>
+  <svg id="lcChart" class="chart" viewBox="0 0 520 280"></svg><div class="row" style="justify-content:flex-end">${figButtons('lcChart', 'Sekil_ogrenme_egrisi')}</div>
   ${plato ? `<div class="note">Plato eğilimi: <b>${plato} bağımsız katılımcıdan</b> sonra iki ardışık basamakta Dice artışı &lt; ${th}.</div>` : L.length >= 3 ? `<div class="note w">Henüz plato yok (eşik ${th}). Katılımcı eklemeye devam.</div>` : ''}</div>
   <div class="card"><h3>Basamak ekle</h3><div class="form"><label class="f">Bağımsız katılımcı sayısı<input id="lcN" inputmode="numeric"></label><label class="f">Ortalama Dice<input id="lcD" inputmode="decimal" placeholder="0,87"></label><label class="f">SS<input id="lcS" inputmode="decimal"></label><label class="f">Not<input id="lcT"></label></div>
   <div class="row" style="margin-top:8px"><button class="btn p" data-act="lcAdd">Ekle</button><button class="btn" data-act="lcCSV">⇧ ogrenme_egrisi.csv</button>${inp(null, 'ayar.plato', 'Plato eşiği (ΔDice)', { num: true, rr: true })}</div>
@@ -985,8 +985,8 @@ function drawLC() {
 
 // ---------- FAZ 2 ----------
 VIEWS.faz2 = () => {
-  const t = [['fenotip', 'Fenotip sınıflandırma'], ['rand', 'Randomizasyon'], ['kutuphane', 'Egzersiz kütüphanesi'], ['takvim', 'Haftalık takvim'], ['butce', 'Bütçe & yol gideri']];
-  return `<div class="top"><div><h1>Faz 2 · Fenotip temelli tedavi</h1><p>H3: fenotipe özgü egzersiz sonrası hedef LM parametreleri ve klinik sonuçlarda iyileşme</p></div></div>${tabs('f2tab', t)}${{ fenotip: f2Fen, rand: f2Rand, kutuphane: f2Lib, takvim: f2Cal, butce: f2Budget }[UI.f2tab]()}`;
+  const t = [['fenotip', 'Fenotip sınıflandırma'], ['rand', 'Randomizasyon'], ['kutuphane', 'Egzersiz kütüphanesi'], ['olay', 'Olumsuz olaylar'], ['takvim', 'Haftalık takvim'], ['butce', 'Bütçe & yol gideri']];
+  return `<div class="top"><div><h1>Faz 2 · Fenotip temelli tedavi</h1><p>H3: fenotipe özgü egzersiz sonrası hedef LM parametreleri ve klinik sonuçlarda iyileşme</p></div></div>${tabs('f2tab', t)}${{ fenotip: f2Fen, rand: f2Rand, kutuphane: f2Lib, olay: f2Olay, takvim: f2Cal, butce: f2Budget }[UI.f2tab]()}`;
 };
 function f2Fen() {
   const ref = getRef(); const ps = S.participants.filter(p => p.grup === 'KBA' && p.durum !== 'uygun_degil');
@@ -1377,7 +1377,7 @@ VIEWS.spss = () => {
   <div class="row" style="margin:10px 0">${[['tanim', 'Tanımlayıcı + normallik'], ['karsi', 'Sağlıklı–KBA karşılaştırma'], ['icc', 'ICC + Bland–Altman (H2)'], ['mixed', 'Lineer karma model (H3)'], ['glm', 'Tekrarlı ölçüm ANOVA']].map(([k, l]) => `<label class="chk" style="padding:0 8px 0 0"><input type="checkbox" data-chg="spOpt" data-k="${k}" ${o[k] ? 'checked' : ''}> ${l}</label>`).join('')}</div>
   <pre class="code">${h(syn)}</pre></div>
   <div class="card"><h3>3 · SPSS'te</h3><ol class="steps"><li>CSV'leri yukarıdaki klasöre kaydet (adlarını değiştirme).</li><li>SPSS › File › New › Syntax; kopyaladığın syntax'ı yapıştır.</li><li>Run › All. "genis", "goruntu" ve "uzun" veri setleri etiketli olarak açılır.</li><li>Kaydet: File › Save As › <span class="mono">.sav</span>. Bundan sonra doğrudan .sav ile çalışabilirsin.</li></ol>
-  <div class="note">Uygulamadaki analizlerle SPSS çıktısını karşılaştırabilirsin. Karma modelde SPSS Satterthwaite serbestlik derecesi kullanır; uygulama yaklaşık serbestlik derecesi kullandığı için p değerleri küçük farklarla ayrışabilir.</div></div>`;
+  <div class="note">Uygulamadaki analizlerle SPSS çıktısını karşılaştırabilirsin. Karma modelde SPSS Satterthwaite serbestlik derecesi kullanır; uygulama yaklaşık serbestlik derecesi kullandığı için p değerleri küçük farklarla ayrışabilir.</div></div>${codebookCard()}`;
 };
 ACT.spOpt = el => { UI.spssOpt[el.dataset.k] = el.checked; render(); };
 ACT.dsDL = el => { const k = el.dataset.k; downloadFile(DATASETS[k][3], dsCSV(k), 'text/csv'); };
@@ -1446,18 +1446,18 @@ function aUyum() {
   <tr><td>ICC(3,1) tutarlılık, tek ölçüm</td><td class="n">${f(ic.icc31, 3)}</td><td class="n">${f(ic.ci31[0], 3)} – ${f(ic.ci31[1], 3)}</td><td>${ST.iccLabel(ic.icc31)}</td></tr>
   <tr><td>ICC(2,k) mutlak uyum, ortalama</td><td class="n">${f(ic.icc2k, 3)}</td><td></td><td></td></tr></tbody></table>
   <p class="small">F(${ic.df1}, ${ic.df2}) = ${f(ic.F, 2)}, p ${fp(ic.p)} · SEM = ${f(ic.sem, 3)} · MDC₉₅ = ${f(ic.mdc95, 3)} ${unit}</p><p class="small muted">Yorum: &lt;0,50 zayıf · 0,50–0,75 orta · 0,75–0,90 iyi · &gt;0,90 mükemmel (Koo ve Li, 2016). SPSS karşılığı: Two-Way Random, Absolute Agreement.</p></div>
-  <div class="card"><h3>Bland–Altman (${RATER[rb]} − ${RATER[ra]})</h3><svg id="baChart" class="chart" viewBox="0 0 520 300"></svg>
+  <div class="card"><h3>Bland–Altman (${RATER[rb]} − ${RATER[ra]})</h3><svg id="baChart" class="chart" viewBox="0 0 520 300"></svg><div class="row" style="justify-content:flex-end">${figButtons('baChart', 'Sekil_Bland_Altman_' + UI.up + '_' + UI.upair)}</div>
   <table><tbody><tr><td>Yanlılık (ort. fark)</td><td class="n">${f(ba.bias, 3)} (${f(ba.biasCI[0], 3)} – ${f(ba.biasCI[1], 3)})</td></tr><tr><td>Uyum sınırları</td><td class="n">${f(ba.loaL, 3)} – ${f(ba.loaU, 3)}</td></tr><tr><td>MAE / RMSE</td><td class="n">${f(ba.mae, 3)} / ${f(ba.rmse, 3)}</td></tr><tr><td>Orantısal yanlılık</td><td class="n">r=${f(ba.reg?.r, 2)}, p=${fp(ba.reg?.p)}</td></tr></tbody></table></div></div>
   <div class="card"><div class="row"><h3 style="margin:0">Tez paragrafı</h3><span class="sp"></span>${clipBtn(para)}</div><div class="para">${para}</div></div>` : ''}`;
 }
 function drawBA(ba, unit) {
-  const svg = document.getElementById('baChart'); if (!svg) return; const W = 520, H = 300, m = { l: 54, r: 60, t: 12, b: 38 };
+  const svg = document.getElementById('baChart'); if (!svg) return; const W = 560, H = 300, m = { l: 54, r: 104, t: 12, b: 38 }; svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   const xs = ba.avg, ys = ba.diff.concat([ba.loaL, ba.loaU]); const x0 = Math.min(...xs), x1 = Math.max(...xs), pad = (x1 - x0) * 0.06 || 1; const y0 = Math.min(...ys), y1 = Math.max(...ys), py = (y1 - y0) * 0.1 || 1;
   const X = v => m.l + (v - (x0 - pad)) / ((x1 + pad) - (x0 - pad)) * (W - m.l - m.r), Y = v => H - m.b - (v - (y0 - py)) / ((y1 + py) - (y0 - py)) * (H - m.t - m.b);
   let g = ''; for (let i = 0; i <= 4; i++) { const v = (y0 - py) + ((y1 + py) - (y0 - py)) * i / 4; g += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="#efebe3"/><text x="${m.l - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="11" fill="#8a867e">${f(v, 2)}</text>`; }
   for (let i = 0; i <= 4; i++) { const v = (x0 - pad) + ((x1 + pad) - (x0 - pad)) * i / 4; g += `<text x="${X(v)}" y="${H - m.b + 16}" text-anchor="middle" font-size="11" fill="#8a867e">${f(v, 2)}</text>`; }
   const hl = (v, l, dash) => `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="${dash ? '#8a867e' : '#1d1c1a'}" stroke-width="1.5" ${dash ? 'stroke-dasharray="5 4"' : ''}/><text x="${W - m.r + 4}" y="${Y(v) + 4}" font-size="11" fill="#55524c">${l} ${f(v, 2)}</text>`;
-  svg.innerHTML = `${g}${hl(0, '', true).replace(/<text.*<\/text>/, '')}${hl(ba.loaU, '+1,96SS', true)}${hl(ba.loaL, '−1,96SS', true)}${hl(ba.bias, 'ort.', false)}${xs.map((x, i) => `<circle cx="${X(x)}" cy="${Y(ba.diff[i])}" r="4.5" fill="#2a78d6" fill-opacity=".75" stroke="#fff" stroke-width="1.5"><title>ortalama ${f(x, 3)} · fark ${f(ba.diff[i], 3)}</title></circle>`).join('')}
+  svg.innerHTML = `${g}<line x1="${m.l}" x2="${W - m.r}" y1="${Y(0)}" y2="${Y(0)}" stroke="#c9c2b4" stroke-width="1"/>${hl(ba.loaU, '+1,96 SS', true)}${hl(ba.loaL, '−1,96 SS', true)}${hl(ba.bias, 'Ort.', false)}${xs.map((x, i) => `<circle cx="${X(x)}" cy="${Y(ba.diff[i])}" r="4.5" fill="#2a78d6" fill-opacity=".75" stroke="#fff" stroke-width="1.5"><title>ortalama ${f(x, 3)} · fark ${f(ba.diff[i], 3)}</title></circle>`).join('')}
   <text x="${(W + m.l - m.r) / 2}" y="${H - 4}" text-anchor="middle" font-size="12" fill="#55524c">İki yöntemin ortalaması ${unit ? '(' + unit + ')' : ''}</text><text x="12" y="${H / 2}" transform="rotate(-90 12 ${H / 2})" text-anchor="middle" font-size="12" fill="#55524c">Fark</text>`;
 }
 const OUT = [['vas_ist', 'VAS istirahat', '', -1], ['vas_akt', 'VAS aktivite', '', -1], ['odi', 'ODI (%)', '%', -1], ['csa', 'CSA (cm²)', 'cm²', 1], ['mgv', 'Ekojenite (MGV)', '', -1], ['akt', 'Aktivasyon oranı (%)', '%', 1]];
@@ -1487,7 +1487,7 @@ function aFaz2() {
     return `<div class="card"><div class="row"><h3 style="margin:0">${FEN[fn]}</h3><span class="tag">${subj.size} katılımcı</span><span class="sp"></span>${para ? clipBtn(para, null, 'Paragraf') : ''}</div><div class="tbl" style="margin-top:10px">${desc}</div>
     ${fit ? `<div class="grid g2" style="margin-top:12px"><div><table><thead><tr><th>Sabit etki</th><th class="n">β</th><th class="n">SH</th><th class="n">p</th></tr></thead><tbody>${fit.names.map((n, i) => `<tr><td>${n}</td><td class="n">${f(fit.beta[i], 3)}</td><td class="n">${f(fit.se[i], 3)}</td><td class="n">${fp(fit.p[i])}</td></tr>`).join('')}</tbody></table>
      <table style="margin-top:8px"><thead><tr><th>Tip III benzeri testler</th><th class="n">F</th><th class="n">sd</th><th class="n">p</th></tr></thead><tbody>${[['Grup', fit.group], ['Zaman', fit.time], ['<b>Grup × zaman</b>', fit.inter]].map(([l, w]) => w ? `<tr><td>${l}</td><td class="n">${f(w.F, 2)}</td><td class="n">${w.df1}, ${w.df2}</td><td class="n">${fp(w.p)}</td></tr>` : '').join('')}</tbody></table>
-     <p class="small muted">Rastgele kesişim varyansı ${f(fit.tau2, 3)}, artık varyans ${f(fit.sigma2, 3)} (ICC ${f(fit.icc, 2)}). REML. Referans: kontrol grubu, başlangıç.</p></div><div><svg id="mc${fn}" class="chart" viewBox="0 0 420 260"></svg><div class="legend"><span><i style="background:var(--s1)"></i>Egzersiz</span><span><i style="background:var(--s2)"></i>Kontrol</span><span class="muted">model tahmini ortalamalar</span></div></div></div>` : '<p class="small muted">Karma model için bu fenotipte en az 4 randomize katılımcı gerekli.</p>'}${para ? `<div class="para">${para}</div>` : ''}</div>`;
+     <p class="small muted">Rastgele kesişim varyansı ${f(fit.tau2, 3)}, artık varyans ${f(fit.sigma2, 3)} (ICC ${f(fit.icc, 2)}). REML. Referans: kontrol grubu, başlangıç.</p></div><div><svg id="mc${fn}" class="chart" viewBox="0 0 420 260"></svg><div class="row" style="justify-content:flex-end">${figButtons('mc' + fn, 'Sekil_F' + fn + '_' + UI.fy)}</div><div class="legend"><span><i style="background:var(--s1)"></i>Egzersiz</span><span><i style="background:var(--s2)"></i>Kontrol</span><span class="muted">model tahmini ortalamalar</span></div></div></div>` : '<p class="small muted">Karma model için bu fenotipte en az 4 randomize katılımcı gerekli.</p>'}${para ? `<div class="para">${para}</div>` : ''}</div>`;
   });
   return `<div class="card"><div class="form"><label class="f">Sonuç ölçütü<select data-chg="aSet" data-k="fy">${OUT.map(([k, l]) => `<option value="${k}" ${UI.fy === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label><label class="f">Fenotip<select data-chg="aSet" data-k="ff">${[1, 2, 3, 4].map(k => `<option value="${k}" ${UI.ff == k ? 'selected' : ''}>${FEN[k]}</option>`).join('')}<option value="hepsi" ${UI.ff === 'hepsi' ? 'selected' : ''}>Dört fenotip</option></select></label></div>
   <p class="small muted">Etik başvurundaki plan: her fenotip kendi kontrol grubuyla karşılaştırılır; temel tedavi etkisi grup × zaman etkileşimidir. Fenotipler birbiriyle karşılaştırılmaz.</p></div>${blocks.join('')}`;
@@ -1583,7 +1583,7 @@ function milestones() {
     ['Faz 1 · Model (Cemil Hoca ile)', [[!!S.folds, 'Katılımcı düzeyinde 5-kat + bağımsız test ayırmasını oluştur ve listeyi paylaş', 'faz1'], [S.lc.length >= 3, `Öğrenme eğrisi basamaklarını kaydet (${S.lc.length} basamak)`, 'faz1'], [S.seg.length > 0, 'Model maskelerini karşılaştır: Dice, IoU, precision, recall, HD95 (H1)', 'faz1'], [ai > 0, 'Model CSA/MGV çıktısını içe aktar', 'faz1'], [ai > 0 && r1 > 0, 'Otomatik–manuel uyum: ICC, Bland–Altman, MAE (H2)', 'analiz']]],
     ['Fenotip algoritması', [[sag.length >= 10, `Referans dağılım için yeterli sağlıklı veri (şu an ${sag.length})`, 'faz1'], [!!S.ref?.frozen, 'Faz 2 başlamadan referans dağılımı dondur', 'faz1'], [!!S.randLists, 'Fenotip tabakalı randomizasyon listesini oluştur', 'faz2']]],
     ['Faz 2 · Doktora', [[ps.some(p => p.rand), 'İlk Faz 2 katılımcısını fenotiple ve randomize et', 'faz2'], [ps.filter(p => p.rand).length >= 8 * S.ayar.hedefGrup, `Hedef örneklem: ${8 * S.ayar.hedefGrup} (şu an ${ps.filter(p => p.rand).length})`, 'faz2']]],
-    ['Yazım', [[false, 'Tablo 1–4 ve akış şemasını tez taslağına aktar', 'rapor'], [false, 'SPSS çıktılarıyla uygulama sonuçlarını karşılaştır (çift kontrol)', 'spss']]]
+    ['Yazım', [[qcRun().filter(x => x.sev === 'hata').length === 0 && S.participants.length > 0, 'Veri kalitesi ekranında hata kalmasın', 'kalite'], [(S.refs || []).length >= 20, `Kaynakçayı uygulamaya aktar (${(S.refs || []).length} kaynak)`, 'kaynakca'], [false, 'Tablo 1–4 ve akış şemasını tez taslağına aktar', 'rapor'], [false, 'SPSS çıktılarıyla uygulama sonuçlarını karşılaştır (çift kontrol)', 'spss']]]
   ];
 }
 const THESIS = [['ÖZET / ABSTRACT', 'Amaç, yöntem, Faz 1 bulguları (DSC, ICC), sonuç. Anahtar kelimeler: lumbar multifidus, ultrason, derin öğrenme, segmentasyon, kronik bel ağrısı.'], ['1. GİRİŞ', 'Problem: manuel US ölçümünün değerlendirici bağımlılığı ve zaman maliyeti → otomatik analiz gereksinimi. Amaç ve H1–H2.'], ['2. GENEL BİLGİLER', 'LM anatomisi ve proprioseptif rolü; KBA’da atrofi, yağ infiltrasyonu, aktivasyon bozukluğu; RUSI; CSA/ekojenite/aktivasyon; derin öğrenme ile segmentasyon (U-Net ailesi); fenotip temelli yaklaşım.'], ['3. GEREÇ VE YÖNTEM', 'Bireyler ve dahil etme ölçütleri · US protokolü (Clarius L7 HD3, L5–S1, 15 görüntü) · ground truth segmentasyon (ImageJ, iki değerlendirici) · ön işleme ve veri artırma · katılımcı düzeyinde 5-kat CV + test · model ve kayıp fonksiyonu · CSA/MGV/aktivasyon hesabı · fenotip algoritması · istatistik (Dice, IoU, precision, recall, HD95, ICC, Bland–Altman, MAE). Raporlama: TRIPOD+AI ve CLAIM 2024.'], ['4. BULGULAR', 'Tablo 1 katılımcılar · öğrenme eğrisi · Tablo 3 segmentasyon · Tablo 4 uyum · Tablo 2 referans değerler · fenotip dağılımı (KBA Faz 1).'], ['5. TARTIŞMA', 'LUMINOUS (Belasso) ve Wesselink çalışmalarıyla karşılaştırma; uyum düzeyinin klinik anlamı; sınırlılıklar (tek merkez, tek cihaz, tek seviye L5–S1, referans eşiklerin çalışma-içi olması).'], ['6. SONUÇ VE ÖNERİLER', 'Sistemin Faz 2 (doktora) fenotip temelli egzersiz çalışmasına aktarımı.']];
@@ -2001,6 +2001,173 @@ async function programPDF(p, pr) {
 }
 
 ACT.pgDozIn = el => { UI.pDoz[el.dataset.pdoz] = el.value; };
+
+/* ===== Veri kalitesi, olumsuz olaylar, şekil dışa aktarma, kaynakça, değişken sözlüğü ===== */
+
+// ---------- 1 · VERİ KALİTESİ ----------
+const QC = { folder: null };
+function qcRun() {
+  const out = []; const add = (sev, p, alan, msg) => out.push({ sev, p, alan, msg });
+  const all = S.participants.filter(p => p.durum !== 'uygun_degil');
+  const rng = (v, lo, hi) => isN(v) && (v < lo || v > hi);
+  all.forEach(p => {
+    const d = p.demo || {};
+    if (!isN(d.yas)) add('uyari', p, 'Demografik', 'Yaş eksik'); else if (rng(d.yas, 18, 55)) add('hata', p, 'Demografik', `Yaş ${d.yas}: 18–55 dışında`);
+    if (!d.cinsiyet) add('uyari', p, 'Demografik', 'Cinsiyet eksik');
+    if (!isN(d.boy) || !isN(d.kilo)) add('uyari', p, 'Demografik', 'Boy ya da kilo eksik'); else { if (rng(d.boy, 130, 215)) add('hata', p, 'Demografik', `Boy ${d.boy} cm olası değil`); if (rng(d.kilo, 35, 180)) add('hata', p, 'Demografik', `Kilo ${d.kilo} kg olası değil`); const b = bmi(d); if (rng(b, 14, 50)) add('uyari', p, 'Demografik', `VKİ ${f(b, 1)} sıra dışı — boy/kilo birimini kontrol et`); }
+    if (!p.onam?.imzali) add('hata', p, 'Onam', 'Onam formu işaretlenmemiş');
+    const e = eligibility(p); if (e.why.length) add('hata', p, 'Uygunluk', e.why.join(' · '));
+    if (p.grup === 'KBA') { const t0 = p.tp?.T0 || {}; if (!isN(t0.vasRest) && !isN(t0.vasAct)) add('uyari', p, 'Klinik', 'Başlangıç VAS eksik'); const n = (t0.odi || []).filter(isN).length; if (n === 0) add('uyari', p, 'Klinik', 'Başlangıç ODI eksik'); else if (n < 9) add('hata', p, 'Klinik', `ODI'de ${10 - n} madde boş (en fazla 1 boş olabilir)`); }
+    tpsOf(p).forEach(tp => {
+      const im = imgsOf(p, tp, 'R1'); if (tp !== 'T0' && p.rand && p.f2?.baslangic && addDays(p.f2.baslangic, tp === 'T4' ? 28 : 56) < today() && !im.length && !imgsOf(p, tp, 'AI').length && p.durum !== 'ayrildi') add('uyari', p, `Ultrason ${tp}`, `${TP[tp]} değerlendirme tarihi geçti, ölçüm yok`);
+      ['R1', 'R2', 'R1b', 'AI'].forEach(rt => {
+        const L = imgsOf(p, tp, rt); if (!L.length) return; const lab = `${tp} · ${{ R1: 'D1', R2: 'D2', R1b: 'D1 tekrar', AI: 'Otomatik' }[rt]}`;
+        if (rt === 'R1') ['ist', 'kolSag', 'kolSol'].forEach(c => { const n = L.filter(i => i.cond === c).length; if (n !== 5) add(n < 3 ? 'hata' : 'uyari', p, lab, `${COND[c]}: ${n}/5 görüntü`); });
+        L.forEach(i => {
+          const pn = parseName(i.file || ''); if (!i.file) add('uyari', p, lab, 'Dosya adı boş satır');
+          else if (!pn.tp) add('hata', p, lab, `Dosya adı kurala uymuyor: ${i.file}`);
+          else { if (pn.code !== p.code) add('hata', p, lab, `${i.file}: kod ${pn.code}, katılımcı ${p.code}`); if (pn.tp !== tp) add('hata', p, lab, `${i.file}: adda ${pn.tp}, kayıtta ${tp}`); if (pn.cond !== i.cond) add('hata', p, lab, `${i.file}: adda ${pn.cond}, kayıtta ${i.cond}`); }
+          const sides = i.cond === 'ist' ? ['csaR', 'csaL', 'mgvR', 'mgvL'] : i.cond === 'kolSag' ? ['csaL'] : ['csaR'];
+          const miss = sides.filter(k => !isN(i[k])); if (miss.length) add('uyari', p, lab, `${i.file || 'satır'}: ${miss.join(', ')} boş`);
+          ['csaR', 'csaL'].forEach(k => { if (rng(i[k], 0.5, 15)) add('hata', p, lab, `${i.file}: ${k} = ${f(i[k], 3)} cm² olası değil (birim mm² mi?)`); });
+          ['mgvR', 'mgvL'].forEach(k => { if (rng(i[k], 0, 255)) add('hata', p, lab, `${i.file}: ${k} = ${f(i[k], 1)} (0–255 dışında)`); });
+        });
+        const ist = L.filter(i => i.cond === 'ist'); ['csaR', 'csaL'].forEach(k => { const a = ist.map(i => i[k]).filter(isN); if (a.length >= 3) { const cv = ST.sd(a) / ST.mean(a) * 100; if (cv > 15) add('uyari', p, lab, `İstirahat ${k === 'csaR' ? 'sağ' : 'sol'} CSA tekrarları arasında değişkenlik yüksek (VK %${f(cv, 1)})`); } });
+        const s = summarize(p, tp, rt); if (s) { if (rng(s.actR, -20, 120) || rng(s.actL, -20, 120)) add('uyari', p, lab, `Aktivasyon oranı sıra dışı (sağ %${f(s.actR, 1)}, sol %${f(s.actL, 1)}) — kasılma koşulları karışmış olabilir`); if (isN(s.asym) && s.asym > 30) add('uyari', p, lab, `CSA asimetrisi %${f(s.asym, 1)} — sağ/sol ROI karışmış olabilir`); }
+      });
+    });
+  });
+  // dosya adı tekrarı
+  const seen = {}; all.forEach(p => (p.img || []).forEach(i => { if (!i.file) return; const k = i.rater + '|' + i.file; (seen[k] = seen[k] || []).push(p); }));
+  Object.entries(seen).forEach(([k, ps]) => { if (ps.length > 1) add('hata', ps[0], 'Görüntü', `${k.split('|')[1]} birden fazla kez kayıtlı (${ps.map(p => p.code).join(', ')})`); });
+  // grup içi aykırı değerler (z>3)
+  [['csa', 'CSA'], ['mgv', 'MGV'], ['act', 'Aktivasyon']].forEach(([k, l]) => ['SAG', 'KBA'].forEach(g => { const rows = all.filter(p => p.grup === g).map(p => [p, summarize(p, 'T0', 'R1')]).filter(([, s]) => s && isN(s[k])); if (rows.length < 8) return; const v = rows.map(r => r[1][k]), m = ST.mean(v), sd = ST.sd(v); rows.forEach(([p, s]) => { const z = (s[k] - m) / sd; if (Math.abs(z) > 3) add('uyari', p, 'Aykırı değer', `${l} = ${f(s[k], 2)} (${g === 'SAG' ? 'sağlıklı' : 'KBA'} grubunda z = ${f(z, 1)}) — ölçümü yeniden kontrol et`); }); }));
+  // klasör karşılaştırması
+  if (QC.folder) {
+    const { bmode, mask } = QC.folder; const base = n => n.replace(/\.[a-z]+$/i, ''); const B = new Set(bmode.map(base)), Mk = new Set(mask.map(base));
+    bmode.forEach(n => { const b = base(n); if (!Mk.has(b)) add('uyari', null, 'Klasör', `${n}: maskesi yok`); const pn = parseName(n); if (!pn.tp) add('hata', null, 'Klasör', `${n}: ad kurala uymuyor`); else if (!S.participants.some(p => p.code === pn.code)) add('hata', null, 'Klasör', `${n}: ${pn.code} kodlu katılımcı kayıtlı değil`); });
+    mask.forEach(n => { if (!B.has(base(n))) add('hata', null, 'Klasör', `${n}: maske var ama B-mode görüntüsü yok`); });
+  }
+  return out;
+}
+VIEWS.kalite = () => {
+  const r = qcRun(); const err = r.filter(x => x.sev === 'hata'), war = r.filter(x => x.sev === 'uyari'); UI.qf = UI.qf || 'hepsi';
+  const show = r.filter(x => UI.qf === 'hepsi' || x.sev === UI.qf).sort((a, b) => (a.sev === b.sev ? 0 : a.sev === 'hata' ? -1 : 1));
+  const rows = show.slice(0, 500).map(x => `<tr ${x.p ? `class="click" data-act="go" data-h="k-${x.p.id}"` : ''}><td><span class="tag ${x.sev === 'hata' ? 'b' : 'w'}">${x.sev === 'hata' ? 'Hata' : 'Uyarı'}</span></td><td><b>${x.p ? h(x.p.code) : '—'}</b></td><td class="small">${h(x.alan)}</td><td>${h(x.msg)}</td></tr>`);
+  return `<div class="top"><div><h1>Veri kalitesi</h1><p>Analizden ve her hafta yedek almadan önce bir kez bak. Satıra tıklayınca katılımcıya gider.</p></div><div class="row"><button class="btn" data-act="qcFolder">Klasörleri karşılaştır…</button><button class="btn" data-act="qcCSV" ${r.length ? '' : 'disabled'}>⇩ Liste (CSV)</button></div></div>
+  <div class="grid g3" style="margin-bottom:14px"><div class="kpi"><div class="l">Hata</div><div class="v" style="color:var(--bad)">${err.length}</div><div class="s">analizden önce düzeltilmeli</div></div><div class="kpi"><div class="l">Uyarı</div><div class="v" style="color:var(--warn)">${war.length}</div><div class="s">kontrol et; gerekçeliyse kalabilir</div></div><div class="kpi"><div class="l">Klasör kontrolü</div><div class="v" style="font-size:20px">${QC.folder ? `${QC.folder.bmode.length} B-mode · ${QC.folder.mask.length} maske` : '—'}</div><div class="s">${QC.folder ? 'bu oturumda tarandı' : 'Tez_Veri klasörünü seç'}</div></div></div>
+  ${!r.length ? '<div class="note">Sorun bulunmadı. 👏</div>' : `<div class="card"><div class="row" style="margin-bottom:10px">${[['hepsi', 'Hepsi'], ['hata', 'Hatalar'], ['uyari', 'Uyarılar']].map(([k, l]) => `<button class="btn sm ${UI.qf === k ? 'p' : ''}" data-act="tab" data-k="qf" data-v="${k}">${l}</button>`).join('')}</div>${tableHTML(['', 'Kod', 'Alan', 'Sorun'], rows)}</div>`}
+  <div class="card"><h3>Neler kontrol ediliyor</h3><ul class="small"><li>Eksik form alanları, imzasız onam, uygunluk ölçütleri, ODI'de birden fazla boş madde</li><li>Olası olmayan değerler: yaş, boy, kilo, VKİ; CSA 0,5–15 cm² dışı (mm² girilmiş olabilir); MGV 0–255 dışı</li><li>Görüntü sayıları (her koşulda 5), dosya adının kayıtla uyuşması (kod, zaman, koşul), aynı dosyanın iki kez girilmesi</li><li>Aynı koşuldaki tekrarlar arasında yüksek değişkenlik (VK &gt; %15), sıra dışı aktivasyon ya da asimetri (sağ/sol karışması)</li><li>Grup içinde z &gt; 3 aykırı değerler · tarihi geçen ama ölçümü olmayan Faz 2 değerlendirmeleri</li><li>Klasör karşılaştırması: maskesi olmayan görüntü, görüntüsü olmayan maske, kayıtsız kod</li></ul></div>`;
+};
+ACT.qcFolder = () => { const i = document.createElement('input'); i.type = 'file'; i.webkitdirectory = true; i.multiple = true; i.onchange = () => { const fs = [...i.files]; const pick = re => fs.filter(fl => re.test(fl.webkitRelativePath || '') && /\.(png|jpe?g|tiff?)$/i.test(fl.name)).map(fl => fl.name); QC.folder = { bmode: pick(/(^|\/)B-mode\//i), mask: pick(/(^|\/)mask\//i) }; if (!QC.folder.bmode.length && !QC.folder.mask.length) toast('B-mode/ ve mask/ alt klasörleri bulunamadı — Tez_Veri klasörünü seç.'); render(); }; i.click(); };
+ACT.qcCSV = () => downloadFile(`veri_kalitesi_${today()}.csv`, toCSV(qcRun().map(x => ({ seviye: x.sev, kod: x.p?.code || '', alan: x.alan, sorun: x.msg })), ['seviye', 'kod', 'alan', 'sorun']), 'text/csv');
+
+// ---------- 3 · OLUMSUZ OLAYLAR ----------
+const OT = ['Egzersizle ağrı artışı (≥2 puan)', 'Gecikmiş kas ağrısı', 'Ultrason jeline cilt reaksiyonu', 'Düşme', 'Baş dönmesi / tansiyon', 'Radiküler belirti (yayılan ağrı, uyuşma)', 'Diğer'];
+function olayForm(p, o = {}) {
+  return `<div class="form"><label class="f">Tarih<input type="date" id="ol_t" value="${o.tarih || today()}"></label><label class="f">Tür<select id="ol_tur">${OT.map(x => `<option ${o.tur === x ? 'selected' : ''}>${x}</option>`).join('')}</select></label>
+  <label class="f">Şiddet<select id="ol_s">${['Hafif', 'Orta', 'Ciddi'].map(x => `<option ${o.siddet === x ? 'selected' : ''}>${x}</option>`).join('')}</select></label><label class="f">Müdahaleyle ilişki<select id="ol_i">${['İlişkisiz', 'Olası', 'Muhtemel', 'Kesin'].map(x => `<option ${o.iliski === x ? 'selected' : ''}>${x}</option>`).join('')}</select></label>
+  <label class="f">Yapılan<select id="ol_a">${['Değişiklik yok', 'Doz / yük azaltıldı', 'Seans sonlandırıldı', 'Hekime yönlendirildi', 'Çalışmadan çıkarıldı'].map(x => `<option ${o.aksiyon === x ? 'selected' : ''}>${x}</option>`).join('')}</select></label><label class="f">Sonuç<select id="ol_so">${['Düzeldi', 'Devam ediyor', 'Bilinmiyor'].map(x => `<option ${o.sonuc === x ? 'selected' : ''}>${x}</option>`).join('')}</select></label>
+  <label class="f" style="grid-column:1/-1">Açıklama (kişisel bilgi yazma)<textarea id="ol_ac" rows="2">${h(o.aciklama || '')}</textarea></label></div><p class="small muted">"Ciddi" olaylar (hastaneye yatış, kalıcı hasar vb.) etik kurula ve sorumlu araştırmacıya bildirilir.</p>`;
+}
+ACT.olayEkle = el => { const p = P(el.dataset.pid); const o = el.dataset.oid ? (p.olaylar || []).find(x => x.id === el.dataset.oid) : null; modal(`<h3>Olumsuz olay – ${h(p.code)}</h3>${olayForm(p, o || { tarih: el.dataset.t })}`, m => { const g = s => m.querySelector(s).value; const rec = { id: o?.id || uid(), tarih: g('#ol_t'), tur: g('#ol_tur'), siddet: g('#ol_s'), iliski: g('#ol_i'), aksiyon: g('#ol_a'), sonuc: g('#ol_so'), aciklama: g('#ol_ac'), grup: p.rand?.grup || '' }; p.olaylar = (p.olaylar || []).filter(x => x.id !== rec.id).concat([rec]); logEv(`${p.code}: olumsuz olay (${rec.tur}, ${rec.siddet})`); save(); render(); if (rec.siddet === 'Ciddi') modal('<h3>Ciddi olumsuz olay</h3><p>Bu olayı sorumlu araştırmacıya (Prof. Dr. Sevil Bilgin) ve etik kurula bildirmen gerekir. Bildirim tarihini olayın açıklamasına not et.</p>'); }, 'Kaydet'); };
+ACT.olaySil = el => { const p = P(el.dataset.pid); confirmBox('Olay kaydı silinecek.', () => { p.olaylar = (p.olaylar || []).filter(x => x.id !== el.dataset.oid); save(); render(); }, 'Sil'); };
+function olayCard(p) {
+  const L = p.olaylar || []; const hint = (p.seans || []).filter(s => s.katildi && isN(s.agriOnce) && isN(s.agriSonra) && s.agriSonra - s.agriOnce >= 2 && !L.some(o => o.tarih === s.tarih));
+  return `<div class="card"><div class="row"><h3 style="margin:0">Olumsuz olaylar</h3><span class="sp"></span><button class="btn sm" data-act="olayEkle" data-pid="${p.id}">＋ Olay kaydet</button></div>
+  ${hint.length ? `<div class="note w">${hint.length} seansta ağrı ≥2 puan arttı ama olay kaydı yok: ${hint.map(s => `<a href="#" data-act="olayEkle" data-pid="${p.id}" data-t="${s.tarih}">${trDate(s.tarih)}</a>`).join(', ')}</div>` : ''}
+  ${L.length ? tableHTML(['Tarih', 'Tür', 'Şiddet', 'İlişki', 'Yapılan', 'Sonuç', ''], L.sort((a, b) => a.tarih < b.tarih ? -1 : 1).map(o => `<tr><td>${trDate(o.tarih)}</td><td>${h(o.tur)}</td><td><span class="tag ${o.siddet === 'Ciddi' ? 'b' : o.siddet === 'Orta' ? 'w' : ''}">${o.siddet}</span></td><td>${o.iliski}</td><td>${o.aksiyon}</td><td>${o.sonuc}</td><td><button class="btn sm" data-act="olayEkle" data-pid="${p.id}" data-oid="${o.id}">Düzenle</button><button class="btn sm d" data-act="olaySil" data-pid="${p.id}" data-oid="${o.id}">✕</button></td></tr>`)) : '<p class="small muted">Kayıt yok.</p>'}</div>`;
+}
+function f2Olay() {
+  const rows = S.participants.flatMap(p => (p.olaylar || []).map(o => [p, o])).sort((a, b) => a[1].tarih < b[1].tarih ? 1 : -1);
+  const by = g => { const ps = S.participants.filter(p => p.rand?.grup === g); const os = ps.flatMap(p => p.olaylar || []); return { n: ps.length, kisi: ps.filter(p => (p.olaylar || []).length).length, olay: os.length, ciddi: os.filter(o => o.siddet === 'Ciddi').length, ilgili: os.filter(o => ['Muhtemel', 'Kesin'].includes(o.iliski)).length, cik: os.filter(o => o.aksiyon === 'Çalışmadan çıkarıldı').length }; };
+  const E = by('EX'), K = by('KON'); const pc = (a, n) => n ? ` (%${f(a / n * 100, 1)})` : '';
+  const tbl = `<table><thead><tr><th></th><th class="n">Egzersiz (n=${E.n})</th><th class="n">Kontrol (n=${K.n})</th></tr></thead><tbody><tr><td>En az bir olay yaşayan katılımcı</td><td class="n">${E.kisi}${pc(E.kisi, E.n)}</td><td class="n">${K.kisi}${pc(K.kisi, K.n)}</td></tr><tr><td>Toplam olay</td><td class="n">${E.olay}</td><td class="n">${K.olay}</td></tr><tr><td>Ciddi olay</td><td class="n">${E.ciddi}</td><td class="n">${K.ciddi}</td></tr><tr><td>Müdahaleyle muhtemel/kesin ilişkili</td><td class="n">${E.ilgili}</td><td class="n">${K.ilgili}</td></tr><tr><td>Olay nedeniyle çalışmadan çıkarılan</td><td class="n">${E.cik}</td><td class="n">${K.cik}</td></tr></tbody></table>`;
+  const para = `Müdahale süresince egzersiz grubunda ${E.kisi} katılımcıda${pc(E.kisi, E.n)} toplam ${E.olay}, kontrol grubunda ${K.kisi} katılımcıda${pc(K.kisi, K.n)} toplam ${K.olay} olumsuz olay kaydedilmiştir. ${E.ciddi + K.ciddi ? `${E.ciddi + K.ciddi} ciddi olumsuz olay gelişmiştir.` : 'Ciddi olumsuz olay gelişmemiştir.'}`;
+  return `<div class="card"><div class="row"><h3 style="margin:0">Olumsuz olay özeti (CONSORT – zararlar)</h3><span class="sp"></span>${clipBtn(plainOf(tbl), wordTable(tbl), 'Tabloyu kopyala')}${clipBtn(para, null, 'Paragraf')}</div><div class="tbl" style="margin-top:10px;max-height:none">${tbl}</div><div class="para">${para}</div></div>
+  <div class="card"><h3>Tüm kayıtlar</h3>${tableHTML(['Tarih', 'Kod', 'Grup', 'Tür', 'Şiddet', 'İlişki', 'Yapılan', 'Sonuç'], rows.map(([p, o]) => `<tr class="click" data-act="go" data-h="k-${p.id}"><td>${trDate(o.tarih)}</td><td>${h(p.code)}</td><td>${p.rand ? (p.rand.grup === 'EX' ? 'Egzersiz' : 'Kontrol') : '—'}</td><td>${h(o.tur)}</td><td>${o.siddet}</td><td>${o.iliski}</td><td>${o.aksiyon}</td><td>${o.sonuc}</td></tr>`))}<p class="small muted">Olay eklemek için katılımcının Seanslar sekmesini kullan.</p></div>`;
+}
+
+// ---------- 4 · ŞEKİLLER ----------
+function figButtons(id, name) { return `<span class="row" style="gap:4px"><button class="btn sm" data-act="figDL" data-id="${id}" data-n="${name}" data-f="png">⇩ PNG 300 dpi</button><button class="btn sm" data-act="figDL" data-id="${id}" data-n="${name}" data-f="svg">⇩ SVG</button></span>`; }
+function svgClean(svgEl, widthCm = 16) {
+  const c = svgEl.cloneNode(true); const vb = (c.getAttribute('viewBox') || '0 0 600 300').split(/\s+/).map(Number);
+  c.setAttribute('xmlns', 'http://www.w3.org/2000/svg'); c.removeAttribute('class'); c.setAttribute('width', vb[2]); c.setAttribute('height', vb[3]); c.setAttribute('font-family', 'Arial, Helvetica, sans-serif');
+  c.querySelectorAll('title').forEach(t => t.remove()); const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); bg.setAttribute('x', vb[0]); bg.setAttribute('y', vb[1]); bg.setAttribute('width', vb[2]); bg.setAttribute('height', vb[3]); bg.setAttribute('fill', '#fff'); c.insertBefore(bg, c.firstChild);
+  c.querySelectorAll('[fill^="var("],[stroke^="var("]').forEach(n => { ['fill', 'stroke'].forEach(a => { const v = n.getAttribute(a); if (v && v.startsWith('var(')) n.setAttribute(a, getComputedStyle(document.documentElement).getPropertyValue(v.slice(4, -1)).trim() || '#333'); }); });
+  return { str: new XMLSerializer().serializeToString(c), vb, widthCm };
+}
+ACT.figDL = el => {
+  const s = document.getElementById(el.dataset.id); if (!s) return; const { str, vb, widthCm } = svgClean(s); const name = el.dataset.n;
+  if (el.dataset.f === 'svg') { downloadFile(name + '.svg', str, 'image/svg+xml'); return; }
+  const px = Math.round(widthCm / 2.54 * 300), sc = px / vb[2]; const im = new Image(); im.onload = () => { const c = document.createElement('canvas'); c.width = px; c.height = Math.round(vb[3] * sc); const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(im, 0, 0, c.width, c.height); c.toBlob(b => downloadFile(name + '.png', b, 'image/png'), 'image/png'); }; im.onerror = () => toast('Şekil dönüştürülemedi; SVG olarak indir.'); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(str);
+};
+
+// ---------- 5 · KAYNAKÇA ----------
+UI.kStil = UI.kStil || 'vancouver';
+function auStr(a, style) { const fam = a.family || a.name || ''; const giv = (a.given || '').split(/[\s.-]+/).filter(Boolean); return style === 'apa' ? (giv.length ? `${fam}, ${giv.map(g => g[0].toUpperCase() + '.').join(' ')}` : fam) : `${fam}${giv.length ? ' ' + giv.map(g => g[0].toUpperCase()).join('') : ''}`; }
+function fmtRef(r, style) {
+  const A = r.authors || []; const pg = r.pages ? r.pages.replace(/--?/, '-') : '';
+  if (style === 'apa') {
+    let au = A.length === 0 ? '' : A.length === 1 ? auStr(A[0], 'apa') : A.length <= 20 ? A.slice(0, -1).map(a => auStr(a, 'apa')).join(', ') + ', & ' + auStr(A[A.length - 1], 'apa') : A.slice(0, 19).map(a => auStr(a, 'apa')).join(', ') + ', … ' + auStr(A[A.length - 1], 'apa');
+    return `${au} (${r.year || 't.y.'}). ${r.title}${/[.?!]$/.test(r.title) ? '' : '.'} <i>${h(r.journal || '')}</i>${r.volume ? `, <i>${h(r.volume)}</i>` : ''}${r.issue ? `(${h(r.issue)})` : ''}${pg ? `, ${pg.replace('-', '–')}` : ''}.${r.doi ? ` https://doi.org/${h(r.doi)}` : ''}`;
+  }
+  const au = A.length > 6 ? A.slice(0, 6).map(a => auStr(a)).join(', ') + ', et al.' : A.map(a => auStr(a)).join(', ');
+  return `${h(au)}. ${h(r.title)}${/[.?!]$/.test(r.title) ? '' : '.'} ${h(r.jabbr || r.journal || '')}. ${h(r.year || '')}${r.volume ? ';' + h(r.volume) : ''}${r.issue ? `(${h(r.issue)})` : ''}${pg ? ':' + h(pg) : ''}.${r.doi ? ` doi:${h(r.doi)}` : ''}`;
+}
+const stripTags = s => s.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+function parseRIS(t) {
+  const out = []; let r = null; t.split(/\r?\n/).forEach(line => { const m = line.match(/^([A-Z][A-Z0-9])\s{1,2}-\s?(.*)$/); if (!m) return; const [, k, v] = m;
+    if (k === 'TY') { r = { authors: [] }; return; } if (!r) return; if (k === 'ER') { if (r.title) out.push(r); r = null; return; }
+    if (['AU', 'A1'].includes(k)) { const [fam, giv = ''] = v.split(',').map(s => s.trim()); r.authors.push({ family: fam, given: giv }); }
+    else if (['TI', 'T1'].includes(k)) r.title = v; else if (['JO', 'JF', 'T2'].includes(k)) r.journal = r.journal || v; else if (['JA', 'J2'].includes(k)) r.jabbr = v; else if (['PY', 'Y1', 'DA'].includes(k)) r.year = r.year || (v.match(/\d{4}/) || [''])[0];
+    else if (k === 'VL') r.volume = v; else if (k === 'IS') r.issue = v; else if (k === 'SP') r.pages = v; else if (k === 'EP') r.pages = (r.pages || '') + '-' + v; else if (k === 'DO') r.doi = v.replace(/^https?:\/\/doi.org\//, ''); else if (k === 'UR') r.url = v; else if (k === 'AN' && /^\d+$/.test(v)) r.pmid = v; });
+  return out;
+}
+function parseNBIB(t) { // PubMed MEDLINE formatı
+  return t.split(/\n\s*\n(?=PMID-)/).map(rec => { const r = { authors: [] }; const lines = rec.replace(/\r/g, '').split('\n'); let last = null; const kv = []; lines.forEach(l => { const m = l.match(/^([A-Z]{2,4})\s*-\s(.*)$/); if (m) { kv.push([m[1], m[2]]); last = kv.length - 1; } else if (last !== null && l.startsWith('      ')) kv[last][1] += ' ' + l.trim(); });
+    kv.forEach(([k, v]) => { if (k === 'PMID') r.pmid = v; else if (k === 'TI') r.title = v; else if (k === 'FAU') { const [fam, giv = ''] = v.split(',').map(s => s.trim()); r.authors.push({ family: fam, given: giv }); } else if (k === 'JT') r.journal = v; else if (k === 'TA') r.jabbr = v; else if (k === 'DP') r.year = (v.match(/\d{4}/) || [''])[0]; else if (k === 'VI') r.volume = v; else if (k === 'IP') r.issue = v; else if (k === 'PG') r.pages = v; else if ((k === 'LID' || k === 'AID') && /\[doi\]/.test(v)) r.doi = r.doi || v.replace(/\s*\[doi\]/, ''); });
+    return r.title ? r : null; }).filter(Boolean);
+}
+async function lookupDOI(doi) { const r = await fetch('https://api.crossref.org/works/' + encodeURIComponent(doi)); if (!r.ok) throw 0; const m = (await r.json()).message; return { title: (m.title || [''])[0], authors: (m.author || []).map(a => ({ family: a.family || a.name, given: a.given || '' })), journal: (m['container-title'] || [''])[0], jabbr: (m['short-container-title'] || [''])[0], year: String(((m.issued || {})['date-parts'] || [[]])[0][0] || ''), volume: m.volume || '', issue: m.issue || '', pages: m.page || '', doi: m.DOI }; }
+async function lookupPMID(id) { const r = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id=${id}`); if (!r.ok) throw 0; const m = (await r.json()).result[id]; if (!m) throw 0; return { title: m.title, authors: (m.authors || []).filter(a => a.authtype === 'Author').map(a => { const [fam, ...ini] = a.name.split(' '); return { family: fam, given: ini.join(' ').split('').join(' ') }; }), journal: m.fulljournalname, jabbr: m.source, year: (m.pubdate || '').slice(0, 4), volume: m.volume, issue: m.issue, pages: m.pages, doi: ((m.articleids || []).find(x => x.idtype === 'doi') || {}).value, pmid: id }; }
+function addRefs(list) { S.refs = S.refs || []; let n = 0, dup = 0; list.forEach(r => { const key = (r.doi || '').toLowerCase() || r.pmid || r.title.toLowerCase().slice(0, 60); if (S.refs.some(x => ((x.doi || '').toLowerCase() || x.pmid || x.title.toLowerCase().slice(0, 60)) === key)) { dup++; return; } S.refs.push({ id: uid(), etiket: UI.kEt || '', ...r }); n++; }); save(); toast(`${n} kaynak eklendi${dup ? `, ${dup} tekrar atlandı` : ''}`); render(); }
+VIEWS.kaynakca = () => {
+  const R = S.refs = S.refs || []; const st = UI.kStil; const q = (UI.kq || '').toLowerCase(); const tags = [...new Set(R.map(r => r.etiket).filter(Boolean))];
+  const list = R.map((r, i) => [r, i]).filter(([r]) => (!q || (r.title + (r.authors || []).map(a => a.family).join(' ') + (r.year || '')).toLowerCase().includes(q)) && (!UI.kTag || r.etiket === UI.kTag));
+  const full = R.map((r, i) => `${st === 'vancouver' ? (i + 1) + '. ' : ''}${fmtRef(r, st)}`);
+  const html = `<ol style="font-family:'Times New Roman';font-size:12pt">${R.map(r => `<li>${fmtRef(r, st)}</li>`).join('')}</ol>`; const htmlApa = `<div style="font-family:'Times New Roman';font-size:12pt">${R.slice().sort((a, b) => auStr(a.authors?.[0] || {}, 'apa').localeCompare(auStr(b.authors?.[0] || {}, 'apa'), 'tr')).map(r => `<p style="padding-left:1.27cm;text-indent:-1.27cm">${fmtRef(r, 'apa')}</p>`).join('')}</div>`;
+  return `<div class="top"><div><h1>Kaynakça</h1><p>${R.length} kaynak · sıra = metindeki ilk atıf sırası (Vancouver)</p></div><div class="row"><select data-chg="aSet" data-k="kStil"><option value="vancouver" ${st === 'vancouver' ? 'selected' : ''}>Vancouver (numaralı)</option><option value="apa" ${st === 'apa' ? 'selected' : ''}>APA 7</option></select>${R.length ? clipBtn(stripTags(full.join('\n')), st === 'apa' ? htmlApa : html, 'Kaynakçayı Word\'e kopyala') : ''}</div></div>
+  <div class="grid g2"><div class="card"><h3>Kaynak ekle</h3><div class="row"><input id="kId" placeholder="DOI ya da PubMed numarası (PMID)" style="flex:1"><button class="btn p" data-act="kLook">Bul</button></div>
+  <p class="small muted" style="margin:6px 0">Otomatik bulma internet ister ve claude.ai görünümünde engelli olabilir; GitHub sürümünde çalışır. Her yerde çalışan yol: PubMed'de <b>Cite › Download .nbib</b> ya da Zotero/Mendeley'den <b>RIS</b> dışa aktarımı.</p>
+  <div class="row"><button class="btn" data-act="kFile">⇧ .nbib / .ris dosyası</button><button class="btn" data-act="kPaste">Metin yapıştır</button><button class="btn" data-act="kManual">Elle gir</button><label class="f" style="flex-direction:row;align-items:center;gap:6px">Etiket<input value="${h(UI.kEt || '')}" data-chg="aSet" data-k="kEt" placeholder="Giriş, Yöntem…" style="width:120px"></label></div></div>
+  <div class="card"><h3>Hacettepe tez yazımı için</h3><ul class="small"><li>Enstitü yönergesindeki kaynak stilini (genellikle numaralı / Vancouver) danışmanınla teyit et.</li><li>Metinde atıf sırası = listedeki sıra. Yeni bir kaynağı metinde öne aldıysan ↑ ile yukarı taşı; numaralar kendiliğinden güncellenir.</li><li>"(n)" düğmesi metne yapıştıracağın atıf numarasını kopyalar.</li><li>Etik başvurundaki kaynakları RIS/nbib ile bir kez içe aktarırsan tez boyunca hazır olur.</li></ul></div></div>
+  <div class="card"><div class="row" style="margin-bottom:10px"><input placeholder="Ara: yazar, başlık, yıl" value="${h(UI.kq || '')}" data-inp="kSearch" style="max-width:260px">${tags.length ? `<button class="btn sm ${!UI.kTag ? 'p' : ''}" data-act="kTag" data-v="">Hepsi</button>${tags.map(t => `<button class="btn sm ${UI.kTag === t ? 'p' : ''}" data-act="kTag" data-v="${h(t)}">${h(t)}</button>`).join('')}` : ''}</div>
+  ${list.length ? list.map(([r, i]) => `<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line2)"><div style="min-width:28px;font-family:var(--f-head);font-size:18px;color:var(--acc)">${i + 1}</div><div style="flex:1"><div style="font-size:13.5px">${fmtRef(r, st)}</div><div class="row small" style="margin-top:4px">${r.etiket ? `<span class="tag">${h(r.etiket)}</span>` : ''}${r.pmid ? `<span class="muted">PMID ${h(r.pmid)}</span>` : ''}<span class="sp"></span><button class="btn sm" data-act="kCite" data-i="${i}">(${i + 1})</button><button class="btn sm" data-act="kMv" data-i="${i}" data-d="-1">↑</button><button class="btn sm" data-act="kMv" data-i="${i}" data-d="1">↓</button><button class="btn sm" data-act="kEdit" data-i="${i}">Düzenle</button><button class="btn sm d" data-act="kDel" data-i="${i}">✕</button></div></div></div>`).join('') : '<p class="muted">Henüz kaynak yok.</p>'}
+  ${R.length ? `<div class="row" style="margin-top:10px"><button class="btn sm" data-act="kRIS">⇩ Tümünü RIS olarak indir (Zotero/Mendeley)</button></div>` : ''}</div>`;
+};
+ACT.kSearch = el => { UI.kq = el.value; clearTimeout(ACT._kt); ACT._kt = setTimeout(() => { render(); const i = document.querySelector('[data-inp=kSearch]'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); };
+ACT.kTag = el => { UI.kTag = el.dataset.v; render(); };
+ACT.kLook = async el => { const v = document.getElementById('kId').value.trim().replace(/^https?:\/\/(dx\.)?doi\.org\//, ''); if (!v) return; el.disabled = true; el.textContent = 'Aranıyor…'; try { addRefs([/^\d{5,9}$/.test(v) ? await lookupPMID(v) : await lookupDOI(v)]); } catch (e) { toast('Bulunamadı ya da internet erişimi yok — .nbib/RIS ya da "Elle gir" kullan.'); el.disabled = false; el.textContent = 'Bul'; } };
+ACT.kFile = () => pickFile('.nbib,.ris,.txt', async fs => { let all = []; for (const fl of fs) { const t = await readText(fl); all = all.concat(/^PMID-/m.test(t) ? parseNBIB(t) : parseRIS(t)); } if (!all.length) toast('Dosyada kaynak bulunamadı.'); else addRefs(all); }, true);
+ACT.kPaste = () => modal('<h3>RIS ya da PubMed (.nbib) metni yapıştır</h3><textarea id="kp" style="width:100%;height:220px"></textarea>', m => { const t = m.querySelector('#kp').value; const L = /^PMID-/m.test(t) ? parseNBIB(t) : parseRIS(t); if (!L.length) { toast('Tanınan kaynak yok.'); return false; } addRefs(L); }, 'Ekle');
+function refForm(r = {}) { return `<div class="form" style="grid-template-columns:1fr"><label class="f">Yazarlar (her satır: Soyad, Ad)<textarea id="kf_au" rows="4">${h((r.authors || []).map(a => `${a.family}, ${a.given || ''}`).join('\n'))}</textarea></label><label class="f">Başlık<textarea id="kf_ti" rows="2">${h(r.title || '')}</textarea></label></div><div class="form"><label class="f">Dergi<input id="kf_jo" value="${h(r.journal || '')}"></label><label class="f">Dergi kısaltması (Vancouver)<input id="kf_ja" value="${h(r.jabbr || '')}"></label><label class="f">Yıl<input id="kf_y" value="${h(r.year || '')}"></label><label class="f">Cilt<input id="kf_v" value="${h(r.volume || '')}"></label><label class="f">Sayı<input id="kf_i" value="${h(r.issue || '')}"></label><label class="f">Sayfa<input id="kf_p" value="${h(r.pages || '')}"></label><label class="f">DOI<input id="kf_d" value="${h(r.doi || '')}"></label><label class="f">Etiket<input id="kf_e" value="${h(r.etiket || UI.kEt || '')}"></label></div>`; }
+function refFromForm(m) { const g = s => m.querySelector(s).value.trim(); return { authors: g('#kf_au').split('\n').map(l => l.trim()).filter(Boolean).map(l => { const [fam, giv = ''] = l.split(',').map(s => s.trim()); return { family: fam, given: giv }; }), title: g('#kf_ti'), journal: g('#kf_jo'), jabbr: g('#kf_ja'), year: g('#kf_y'), volume: g('#kf_v'), issue: g('#kf_i'), pages: g('#kf_p'), doi: g('#kf_d'), etiket: g('#kf_e') }; }
+ACT.kManual = () => modal('<h3>Kaynak ekle</h3>' + refForm(), m => { const r = refFromForm(m); if (!r.title) { toast('Başlık gerekli'); return false; } addRefs([r]); }, 'Ekle');
+ACT.kEdit = el => { const i = +el.dataset.i; modal('<h3>Kaynağı düzenle</h3>' + refForm(S.refs[i]), m => { S.refs[i] = { ...S.refs[i], ...refFromForm(m) }; save(); render(); }, 'Kaydet'); };
+ACT.kDel = el => confirmBox('Kaynak silinecek; sonraki numaralar bir azalır.', () => { S.refs.splice(+el.dataset.i, 1); save(); render(); }, 'Sil');
+ACT.kMv = el => { const i = +el.dataset.i, j = i + +el.dataset.d; if (j < 0 || j >= S.refs.length) return; [S.refs[i], S.refs[j]] = [S.refs[j], S.refs[i]]; save(); render(); };
+ACT.kCite = el => copyText(`(${+el.dataset.i + 1})`);
+ACT.kRIS = () => downloadFile('kaynakca.ris', S.refs.map(r => ['TY  - JOUR', ...(r.authors || []).map(a => `AU  - ${a.family}, ${a.given || ''}`), `TI  - ${r.title}`, `JO  - ${r.journal || ''}`, r.jabbr ? `J2  - ${r.jabbr}` : '', `PY  - ${r.year || ''}`, r.volume ? `VL  - ${r.volume}` : '', r.issue ? `IS  - ${r.issue}` : '', r.pages ? `SP  - ${r.pages.split('-')[0]}` : '', r.pages && r.pages.includes('-') ? `EP  - ${r.pages.split('-')[1]}` : '', r.doi ? `DO  - ${r.doi}` : '', 'ER  - '].filter(Boolean).join('\r\n')).join('\r\n\r\n'), 'text/plain');
+
+// ---------- 6 · DEĞİŞKEN SÖZLÜĞÜ ----------
+function codebook(k) { const [, meta] = DATASETS[k]; return meta().map(v => ({ ad: v.name, etiket: v.label, tur: v.type === 's' ? 'Metin' : 'Sayısal', duzey: { nominal: 'Nominal', ordinal: 'Sıralı', scale: 'Ölçek' }[v.level], degerler: v.vals ? Object.entries(VL[v.vals]).map(([a, b]) => `${a} = ${b}`).join('; ') : '' })); }
+function codebookCard() {
+  UI.cbk = UI.cbk || 'genis'; const cb = codebook(UI.cbk);
+  const tbl = `<table><thead><tr><th>Değişken</th><th>Etiket</th><th>Tür</th><th>Düzey</th><th>Değer etiketleri</th></tr></thead><tbody>${cb.map(r => `<tr><td class="mono">${r.ad}</td><td>${h(r.etiket)}</td><td>${r.tur}</td><td>${r.duzey}</td><td class="small">${h(r.degerler)}</td></tr>`).join('')}</tbody></table>`;
+  return `<div class="card"><div class="row"><h3 style="margin:0">Değişken sözlüğü (codebook)</h3><span class="sp"></span><select data-chg="aSet" data-k="cbk">${Object.entries(DATASETS).map(([k, d]) => `<option value="${k}" ${UI.cbk === k ? 'selected' : ''}>${d[0]}</option>`).join('')}</select>${clipBtn(plainOf(tbl), wordTable(tbl), 'Word\'e kopyala')}<button class="btn sm" data-act="cbDL">⇩ CSV</button></div><p class="small muted">Tez ekine ve Cemil Hoca'ya: SPSS'teki her değişkenin anlamı ve kodları. Eksik değerler boş hücredir (SPSS'te sistem eksiği).</p><div class="tbl" style="margin-top:10px">${tbl}</div></div>`;
+}
+ACT.cbDL = () => downloadFile(`degisken_sozlugu_${UI.cbk}.csv`, toCSV(codebook(UI.cbk), ['ad', 'etiket', 'tur', 'duzey', 'degerler']), 'text/csv');
 
 load(); render(); window.addEventListener('hashchange', () => { window.scrollTo(0, 0); render(); }); initCaps();
 </script></body></html>
