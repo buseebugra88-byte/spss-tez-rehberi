@@ -1636,7 +1636,8 @@ VIEWS.ayarlar = () => {
   <div class="card"><h3>Fenotip algoritması</h3><div class="form">${inp(null, 'ayar.taraf', 'Sağ–sol birleştirme', { sel: [['ort', 'İki taraf ortalaması'], ['kotu', 'Kötü taraf (küçük CSA, yüksek MGV, düşük aktivasyon)']], rr: true })}${inp(null, 'ayar.refKaynak', 'Referans dağılımın kaynağı', { sel: Object.entries(RATER), rr: true })}${inp(null, 'ayar.f2Kaynak', 'KBA sınıflandırma ölçüm kaynağı', { sel: [['AI_R1', 'Otomatik (yoksa manuel D1)'], ['R1', 'Manuel D1'], ['AI', 'Otomatik']], rr: true })}</div>
   <label class="chk"><input type="checkbox" data-bind="ayar.asimetriEtkilenmis" data-rr="1" ${S.ayar.asimetriEtkilenmis ? 'checked' : ''}> CSA asimetrisi ≥%10'u da "CSA etkilenmiş" say</label>
   <div class="note w small">Protokol sağ–sol birleştirmeyi ve asimetrinin rolünü açıkça tanımlamıyor. Seçimini danışmanınla netleştirip tezde aynı şekilde yaz; referans dondurulduktan sonra değiştirme.</div></div></div>
-  <div class="card"><h3>Yedekleme</h3><p class="small">Veriler bu tarayıcıda saklanır; başka cihazda görünmez ve tarayıcı verisi silinirse kaybolur. Haftada en az bir kez yedek alıp Google Drive'a koymanı öneririm.</p>
+  ${driveCard()}
+  <div class="card"><h3>Dosya olarak yedek</h3><p class="small">Veriler bu tarayıcıda saklanır; başka cihazda görünmez ve tarayıcı verisi silinirse kaybolur. Drive senkronizasyonu açık değilse haftada en az bir kez buradan yedek al.</p>
   <div class="row"><button class="btn p" data-act="backup">⇩ Yedek al (.json)</button>${clipBtn(JSON.stringify(S), null, 'Yedeği kopyala')}<button class="btn" data-act="restore">⇧ Yedekten yükle</button><span class="small muted">Son yedek: ${S.ayar.sonYedek ? new Date(S.ayar.sonYedek).toLocaleString('tr-TR') : 'hiç'}</span></div></div>
   <div class="card"><h3>Örnek veriyle dene</h3><p class="small">Uygulamayı denemek için sentetik 48 Faz 1 ve 48 Faz 2 katılımcısı oluşturur (kodlar X ile başlar). Gerçek veriyle karıştırmamak için yalnızca boş uygulamada çalışır.</p>
   <div class="row"><button class="btn" data-act="demo" ${real ? 'disabled' : ''}>Örnek veri oluştur</button>${demo ? `<button class="btn d" data-act="demoDel">Örnek veriyi sil (${demo})</button>` : ''}</div></div>
@@ -2251,6 +2252,167 @@ ACT.audPaste = () => modal('<h3>Metni yapıştır</h3><p class="small muted">Kay
 ACT.audImport = () => confirmBox(`${AUD.listFromDoc.length} kaynak, dosyadaki sırayla Kaynakça'ya eklenecek (tekrarlar atlanır).`, () => { addRefs(AUD.listFromDoc.map(r => ({ ...r, etiket: UI.kEt || 'Etik başvuru' }))); }, 'Aktar', false);
 ACT.audMap = () => { const a = citationAudit(AUD.text, AUD.listFromDoc.length || (S.refs || []).length); const rows = a.order.map((old, i) => [old, i + 1]).filter(([o, n]) => o !== n); modal(`<h3>Yeniden numaralandırma</h3><p class="small">Metindeki her eski numarayı yenisiyle değiştir ve listeyi yeni sıraya göre diz. Word'de değiştirirken çakışmayı önlemek için önce hepsini geçici bir işaretle (ör. #12#) değiştirip sonra numaraya çevir.</p>${tableHTML(['Eski', 'Yeni'], rows.map(([o, n]) => `<tr><td class="n">${o}</td><td class="n"><b>${n}</b></td></tr>`))}`); };
 ACT.kNumList = () => modal('<h3>Numaralı kaynak listesi yapıştır</h3><p class="small muted">Word\'deki "Kaynaklar" listesini olduğu gibi yapıştır (1. Yazar AB, …). Sıra korunur.</p><textarea id="nl" style="width:100%;height:260px"></textarea>', m => { const L = parseNumberedList(m.querySelector('#nl').value); if (!L.length) { toast('Numaralı satır bulunamadı.'); return false; } addRefs(L); }, 'Aktar');
+
+// ---------- GOOGLE DRIVE SENKRONİZASYONU ----------
+// Google Identity Services (token modeli) + Drive v3, kapsam: drive.file
+// Uygulama yalnızca kendi oluşturduğu dosyaları görür: "Multifidus Tez Asistanı" klasörü,
+// içinde ana veri dosyası ve günlük yedekler.
+const DRV = { token: null, exp: 0, folder: null, file: null, busy: false, timer: null, err: '', gsi: null, client: null, clientId: null, pending: null };
+const DRV_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+const DRV_FOLDER = 'Multifidus Tez Asistanı';
+const DRV_MAIN = 'multifidus_tez_veri.json';
+const DRV_KEY = 'lmTezAsistani.drive';
+
+function drvCfg() { try { return JSON.parse(localStorage.getItem(DRV_KEY) || '{}'); } catch (e) { return {}; } }
+function drvSetCfg(o) { const c = Object.assign(drvCfg(), o); try { localStorage.setItem(DRV_KEY, JSON.stringify(c)); } catch (e) { } return c; }
+function drvOrigin() { return location.protocol.startsWith('http') ? location.origin : '(dosyadan açıldı – GitHub Pages adresinden aç)'; }
+function drvOk() { return DRV.token && Date.now() < DRV.exp - 60000; }
+
+function drvLoadGsi() {
+  if (DRV.gsi) return DRV.gsi;
+  DRV.gsi = new Promise((res, rej) => {
+    if (window.google && google.accounts && google.accounts.oauth2) return res();
+    const s = document.createElement('script'); s.src = 'https://accounts.google.com/gsi/client'; s.async = true;
+    s.onload = () => res(); s.onerror = () => { DRV.gsi = null; rej(new Error('Google oturum betiği yüklenemedi (internet ya da tarayıcı engeli).')); };
+    document.head.appendChild(s);
+  });
+  return DRV.gsi;
+}
+
+// Kullanıcı tıklamasıyla çağrılmalı (açılır pencere engeline takılmamak için)
+async function drvConnect(silent) {
+  const cid = (drvCfg().clientId || '').trim();
+  if (!cid) throw new Error('Önce OAuth istemci kimliğini (Client ID) gir.');
+  await drvLoadGsi();
+  if (!DRV.client || DRV.clientId !== cid) {
+    DRV.clientId = cid;
+    DRV.client = google.accounts.oauth2.initTokenClient({
+      client_id: cid, scope: DRV_SCOPE,
+      callback: r => { const p = DRV.pending; DRV.pending = null; if (!p) return; if (r.error) p.rej(new Error(r.error_description || r.error)); else { DRV.token = r.access_token; DRV.exp = Date.now() + (r.expires_in || 3600) * 1000; drvSetCfg({ bagli: true, hint: true }); p.res(); } },
+      error_callback: e => { const p = DRV.pending; DRV.pending = null; if (p) p.rej(new Error(e && e.type === 'popup_closed' ? 'Google penceresi kapatıldı.' : e && e.type === 'popup_failed_to_open' ? 'Açılır pencere engellendi; tarayıcıda bu siteye açılır pencere izni ver.' : 'Google girişi tamamlanmadı.')); }
+    });
+  }
+  return new Promise((res, rej) => { DRV.pending = { res, rej }; DRV.client.requestAccessToken({ prompt: silent ? '' : (drvCfg().hint ? '' : 'consent') }); });
+}
+
+async function drvFetch(url, opt = {}) {
+  if (!drvOk()) throw new Error('Drive oturumu süresi doldu. "Drive\'a bağlan" ile yenile.');
+  const r = await fetch(url, Object.assign({}, opt, { headers: Object.assign({ Authorization: 'Bearer ' + DRV.token }, opt.headers || {}) }));
+  if (r.status === 401) { DRV.token = null; throw new Error('Drive oturumu sona erdi. Yeniden bağlan.'); }
+  if (!r.ok) { let m = r.status + ''; try { const j = await r.json(); m = (j.error && j.error.message) || m; } catch (e) { } throw new Error('Drive hatası: ' + m); }
+  return r;
+}
+const DQ = s => s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+async function drvFind(q) {
+  const r = await drvFetch('https://www.googleapis.com/drive/v3/files?spaces=drive&fields=files(id,name,modifiedTime,size)&orderBy=modifiedTime desc&pageSize=100&q=' + encodeURIComponent(q));
+  return (await r.json()).files || [];
+}
+async function drvFolder() {
+  if (DRV.folder) return DRV.folder;
+  const f = await drvFind(`name='${DQ(DRV_FOLDER)}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+  if (f.length) return (DRV.folder = f[0].id);
+  const r = await drvFetch('https://www.googleapis.com/drive/v3/files?fields=id', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: DRV_FOLDER, mimeType: 'application/vnd.google-apps.folder' }) });
+  return (DRV.folder = (await r.json()).id);
+}
+async function drvUpload(name, text, fileId) {
+  const folder = await drvFolder();
+  if (fileId) {
+    await drvFetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: text });
+    return fileId;
+  }
+  const b = 'mtb' + Math.random().toString(36).slice(2);
+  const body = `--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({ name, parents: [folder], mimeType: 'application/json' })}\r\n--${b}\r\nContent-Type: application/json\r\n\r\n${text}\r\n--${b}--`;
+  const r = await drvFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', { method: 'POST', headers: { 'Content-Type': 'multipart/related; boundary=' + b }, body });
+  return (await r.json()).id;
+}
+async function drvFiles() {
+  const folder = await drvFolder();
+  return drvFind(`'${folder}' in parents and trashed=false and mimeType='application/json'`);
+}
+
+async function drvSave(manual) {
+  if (DRV.busy) return; DRV.busy = true; DRV.err = '';
+  try {
+    if (!drvOk()) { if (!manual) throw new Error('oturum yok'); await drvConnect(true); }
+    const text = JSON.stringify(S);
+    const files = await drvFiles();
+    const main = files.find(f => f.name === DRV_MAIN);
+    await drvUpload(DRV_MAIN, text, main && main.id);
+    const day = 'yedek_' + today() + '.json';
+    const snap = files.find(f => f.name === day);
+    await drvUpload(day, text, snap && snap.id);
+    const now = new Date().toISOString();
+    drvSetCfg({ son: now });
+    S.ayar.sonYedek = now; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { }
+    if (manual) toast('Drive\'a kaydedildi');
+  } catch (e) { DRV.err = e.message; if (manual) toast(e.message); }
+  DRV.busy = false;
+  if (location.hash.startsWith('#ayarlar')) render();
+  drvBadge();
+}
+
+// Otomatik kayıt: değişiklikten 15 sn sonra, oturum açıksa
+function drvSchedule() {
+  if (!drvCfg().oto || !drvOk()) { drvBadge(); return; }
+  clearTimeout(DRV.timer); DRV.timer = setTimeout(() => drvSave(false), 15000); drvBadge('bekliyor');
+}
+(function () { const _s = save; save = function () { _s(); try { drvSchedule(); } catch (e) { } }; })();
+
+function drvBadge(state) {
+  let el = document.getElementById('drvBadge');
+  const c = drvCfg(); if (!c.clientId) { if (el) el.remove(); return; }
+  if (!el) { el = document.createElement('a'); el.id = 'drvBadge'; el.href = '#ayarlar'; el.style.cssText = 'position:fixed;right:14px;bottom:14px;z-index:50;font:500 12px "IBM Plex Sans",sans-serif;padding:6px 10px;border-radius:999px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.12)'; document.body.appendChild(el); }
+  const ok = drvOk();
+  const txt = DRV.busy ? 'Drive: kaydediliyor…' : DRV.err ? 'Drive: hata' : state === 'bekliyor' ? 'Drive: kaydedilecek' : ok ? 'Drive: bağlı' + (c.son ? ' · ' + new Date(c.son).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '') : 'Drive: bağlı değil';
+  el.textContent = '☁ ' + txt;
+  el.style.background = DRV.err ? '#f6dcd6' : ok ? '#dcebe7' : '#efe9dd'; el.style.color = DRV.err ? '#8a2b1a' : ok ? '#1f5f63' : '#6b5a3a';
+}
+window.addEventListener('beforeunload', e => { if (DRV.timer && drvCfg().oto && drvOk()) { e.preventDefault(); e.returnValue = ''; } });
+
+ACT.drvCid = el => { drvSetCfg({ clientId: el.value.trim() }); DRV.client = null; render(); };
+ACT.drvOto = el => { drvSetCfg({ oto: el.checked }); render(); };
+ACT.drvBaglan = async () => { try { await drvConnect(false); DRV.err = ''; toast('Drive\'a bağlandı'); } catch (e) { DRV.err = e.message; toast(e.message); } render(); drvBadge(); };
+ACT.drvKaydet = () => drvSave(true);
+ACT.drvKes = () => { if (DRV.token && window.google) try { google.accounts.oauth2.revoke(DRV.token, () => { }); } catch (e) { } DRV.token = null; DRV.folder = null; drvSetCfg({ bagli: false, hint: false }); render(); drvBadge(); };
+ACT.drvYukle = async () => {
+  try {
+    if (!drvOk()) await drvConnect(true);
+    const files = (await drvFiles()).sort((a, b) => a.name === DRV_MAIN ? -1 : b.name === DRV_MAIN ? 1 : b.name.localeCompare(a.name));
+    if (!files.length) return toast('Drive klasöründe henüz yedek yok.');
+    modal(`<h3>Drive'dan yükle</h3><p class="small">"${h(DRV_FOLDER)}" klasöründeki kayıtlar. Seçtiğin kayıt bu tarayıcıdaki verilerin yerine geçer.</p>
+      <div class="form"><label class="f">Kayıt<select id="drvSel">${files.map(f => `<option value="${f.id}">${f.name === DRV_MAIN ? 'En güncel veri' : h(f.name.replace('yedek_', 'Günlük yedek · ').replace('.json', ''))} — ${new Date(f.modifiedTime).toLocaleString('tr-TR')}</option>`).join('')}</select></label></div>`, async m => {
+      const id = m.querySelector('#drvSel').value;
+      try {
+        const d = JSON.parse(await (await drvFetch(`https://www.googleapis.com/drive/v3/files/${id}?alt=media`)).text());
+        if (!d.participants) throw new Error('Bu dosya geçerli bir yedek değil.');
+        confirmBox(`Drive kaydında ${d.participants.length} katılımcı var. Bu tarayıcıdaki veriler bununla değiştirilecek.`, () => { S = d; const def = defaults(); S.ayar = Object.assign(def.ayar, S.ayar); for (const k of Object.keys(def)) if (S[k] === undefined) S[k] = def[k]; clearTimeout(DRV.timer); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { } toast('Drive\'dan yüklendi'); render(); }, 'Yükle');
+      } catch (e) { toast(e.message); }
+    }, 'Yükle');
+  } catch (e) { toast(e.message); }
+};
+
+function driveCard() {
+  const c = drvCfg(), ok = drvOk(), org = drvOrigin();
+  return `<div class="card" style="border-color:#1f5f63"><h3>Google Drive senkronizasyonu</h3>
+  <p class="small">Verilerin Drive'ında <b>${h(DRV_FOLDER)}</b> klasörüne kaydedilir: güncel veri + her gün için bir yedek. Uygulama Drive'ında yalnızca kendi oluşturduğu dosyaları görebilir, diğer dosyalarına erişemez.</p>
+  <div class="form"><label class="f" style="grid-column:1/-1">OAuth istemci kimliği (Client ID)<input data-chg="drvCid" value="${h(c.clientId || '')}" placeholder="…apps.googleusercontent.com" spellcheck="false"></label></div>
+  <div class="row" style="margin-top:10px">
+   <button class="btn p" data-act="drvBaglan" ${c.clientId ? '' : 'disabled'}>${ok ? '↻ Bağlantıyı yenile' : '☁ Drive\'a bağlan'}</button>
+   <button class="btn" data-act="drvKaydet" ${c.clientId ? '' : 'disabled'}>⇧ Şimdi Drive'a kaydet</button>
+   <button class="btn" data-act="drvYukle" ${c.clientId ? '' : 'disabled'}>⇩ Drive'dan yükle</button>
+   ${ok ? '<button class="btn d sm" data-act="drvKes">Bağlantıyı kes</button>' : ''}</div>
+  <label class="chk"><input type="checkbox" data-chg="drvOto" ${c.oto ? 'checked' : ''}> Değişikliklerden 15 saniye sonra otomatik kaydet (oturum açıkken)</label>
+  <p class="small muted">Durum: ${DRV.busy ? 'kaydediliyor…' : ok ? 'bağlı' : 'bağlı değil'}${c.son ? ' · son Drive kaydı: ' + new Date(c.son).toLocaleString('tr-TR') : ''}${DRV.err ? ` · <span style="color:#8a2b1a">${h(DRV.err)}</span>` : ''}</p>
+  <div class="note small">Google oturumu güvenlik gereği yaklaşık 1 saat sürer. Süre dolunca otomatik kayıt durur, sağ alttaki rozet "bağlı değil" olur; "Drive'a bağlan"a bir kez basman yeter.</div>
+  <details style="margin-top:10px"><summary class="small"><b>Client ID nasıl alınır? (bir kez)</b></summary><ol class="steps small">
+   <li><a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener">console.cloud.google.com</a> adresinde yeni proje oluştur (ad: Multifidus Tez).</li>
+   <li><b>APIs & Services › Library</b>: "Google Drive API" ara, <b>Enable</b>.</li>
+   <li><b>Google Auth Platform › Branding</b> (OAuth consent screen): uygulama adı ve e-postanı gir, kitle <b>External</b>. <b>Audience</b> bölümünde kendi Gmail adresini <b>Test users</b> olarak ekle.</li>
+   <li><b>Clients › Create client</b>: tür <b>Web application</b>. <b>Authorized JavaScript origins</b> alanına tam olarak şunu yaz: <span class="mono">${h(org)}</span></li>
+   <li>Oluşan <span class="mono">…apps.googleusercontent.com</span> ile biten kimliği kopyalayıp yukarıdaki kutuya yapıştır, "Drive'a bağlan"a bas.</li>
+   <li>Google "doğrulanmamış uygulama" uyarısı gösterirse: <b>Gelişmiş › Multifidus Tez'e git</b>. Uygulamayı yalnızca sen kullandığın için bu normaldir.</li></ol></details></div>`;
+}
+setTimeout(() => drvBadge(), 0);
 
 load(); render(); window.addEventListener('hashchange', () => { window.scrollTo(0, 0); render(); }); initCaps();
 </script></body></html>
