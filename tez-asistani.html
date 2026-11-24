@@ -2416,4 +2416,5 @@ function driveCard() {
 setTimeout(() => drvBadge(), 0);
 
 load(); render(); window.addEventListener('hashchange', () => { window.scrollTo(0, 0); render(); }); initCaps();
-</script></body></html>
+</script><script>if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost"||location.hostname==="127.0.0.1"))navigator.serviceWorker.register("sw.js").catch(()=>{})</script>
+</body></html>
