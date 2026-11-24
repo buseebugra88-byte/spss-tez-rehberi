@@ -1644,8 +1644,8 @@ VIEWS.ayarlar = () => {
   <div class="card"><h3>İşlem kaydı</h3><div class="tbl" style="max-height:240px"><table>${S.log.slice(0, 80).map(l => `<tr><td class="small muted" style="white-space:nowrap">${new Date(l.t).toLocaleString('tr-TR')}</td><td class="small">${h(l.m)}</td></tr>`).join('') || '<tr><td class="muted">Kayıt yok</td></tr>'}</table></div>
   <button class="btn d sm" style="margin-top:10px" data-act="wipe">Tüm verileri sil</button></div>`;
 };
-ACT.backup = () => { S.ayar.sonYedek = new Date().toISOString(); save(); downloadFile(`multifidus_tez_yedek_${today()}.json`, JSON.stringify(S, null, 1), 'application/json'); setTimeout(render, 300); };
-ACT.restore = () => pickFile('.json,application/json', async fl => { try { const d = JSON.parse(await readText(fl)); if (!d.participants) throw 0; confirmBox(`Yedekte ${d.participants.length} katılımcı var. Mevcut veriler bununla değiştirilecek.`, () => { S = d; const def = defaults(); S.ayar = Object.assign(def.ayar, S.ayar); for (const k of Object.keys(def)) if (S[k] === undefined) S[k] = def[k]; save(); toast('Yedek yüklendi'); render(); }, 'Yükle'); } catch (e) { toast('Bu dosya geçerli bir yedek değil.'); } });
+ACT.backup = () => { S.ayar.sonYedek = new Date().toISOString(); save(); downloadFile(`multifidus_tez_yedek_${today()}.json`, JSON.stringify({ ...S, _spss: spssData() }, null, 1), 'application/json'); setTimeout(render, 300); };
+ACT.restore = () => pickFile('.json,application/json', async fl => { try { const d = JSON.parse(await readText(fl)); if (!d.participants) throw 0; confirmBox(`Yedekte ${d.participants.length} katılımcı var. Mevcut veriler bununla değiştirilecek.`, () => { spssRestore(d._spss); delete d._spss; S = d; const def = defaults(); S.ayar = Object.assign(def.ayar, S.ayar); for (const k of Object.keys(def)) if (S[k] === undefined) S[k] = def[k]; save(); toast('Yedek yüklendi'); render(); }, 'Yükle'); } catch (e) { toast('Bu dosya geçerli bir yedek değil.'); } });
 ACT.wipe = () => confirmBox('Bütün katılımcılar, ölçümler ve ayarlar silinecek. Önce yedek al.', () => { S = defaults(); save(); render(); }, 'Hepsini sil');
 ACT.demoDel = () => confirmBox('Örnek katılımcılar ve onlarla oluşan referans, randomizasyon, fold ve metrik kayıtları silinecek.', () => { S.participants = S.participants.filter(p => !p.ornek); S.ref = null; S.randLists = null; S.folds = null; S.seg = []; S.lc = []; S.chat = []; logEv('Örnek veri silindi'); save(); render(); }, 'Sil');
 ACT.demo = () => {
@@ -2331,11 +2331,16 @@ async function drvFiles() {
   return drvFind(`'${folder}' in parents and trashed=false and mimeType='application/json'`);
 }
 
+// SPSS Tez Rehberi (spss-rehberi.html) verileri aynı tarayıcıda "spss." anahtarlarında durur; Drive kaydına ve yedek dosyasına onlar da eklenir.
+function spssData() { const o = {}; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('spss.')) o[k] = localStorage.getItem(k); } } catch (e) { } return o; }
+function spssRestore(o) { if (!o || typeof o !== 'object') return; try { for (const [k, v] of Object.entries(o)) if (k.startsWith('spss.') && typeof v === 'string') localStorage.setItem(k, v); } catch (e) { } }
+function spssHash() { const t = JSON.stringify(spssData()); let x = 5381; for (let i = 0; i < t.length; i++) x = ((x << 5) + x + t.charCodeAt(i)) | 0; return t.length + ':' + x; }
 async function drvSave(manual) {
   if (DRV.busy) return; DRV.busy = true; DRV.err = '';
   try {
     if (!drvOk()) { if (!manual) throw new Error('oturum yok'); await drvConnect(true); }
-    const text = JSON.stringify(S);
+    const spssH = spssHash();
+    const text = JSON.stringify({ ...S, _spss: spssData() });
     const files = await drvFiles();
     const main = files.find(f => f.name === DRV_MAIN);
     await drvUpload(DRV_MAIN, text, main && main.id);
@@ -2343,7 +2348,7 @@ async function drvSave(manual) {
     const snap = files.find(f => f.name === day);
     await drvUpload(day, text, snap && snap.id);
     const now = new Date().toISOString();
-    drvSetCfg({ son: now });
+    drvSetCfg({ son: now, spss: spssH });
     S.ayar.sonYedek = now; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { }
     if (manual) toast('Drive\'a kaydedildi');
   } catch (e) { DRV.err = e.message; if (manual) toast(e.message); }
@@ -2386,7 +2391,7 @@ ACT.drvYukle = async () => {
       try {
         const d = JSON.parse(await (await drvFetch(`https://www.googleapis.com/drive/v3/files/${id}?alt=media`)).text());
         if (!d.participants) throw new Error('Bu dosya geçerli bir yedek değil.');
-        confirmBox(`Drive kaydında ${d.participants.length} katılımcı var. Bu tarayıcıdaki veriler bununla değiştirilecek.`, () => { S = d; const def = defaults(); S.ayar = Object.assign(def.ayar, S.ayar); for (const k of Object.keys(def)) if (S[k] === undefined) S[k] = def[k]; clearTimeout(DRV.timer); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { } toast('Drive\'dan yüklendi'); render(); }, 'Yükle');
+        confirmBox(`Drive kaydında ${d.participants.length} katılımcı var. Bu tarayıcıdaki veriler bununla değiştirilecek.`, () => { spssRestore(d._spss); delete d._spss; S = d; const def = defaults(); S.ayar = Object.assign(def.ayar, S.ayar); for (const k of Object.keys(def)) if (S[k] === undefined) S[k] = def[k]; clearTimeout(DRV.timer); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { } toast('Drive\'dan yüklendi'); render(); }, 'Yükle');
       } catch (e) { toast(e.message); }
     }, 'Yükle');
   } catch (e) { toast(e.message); }
@@ -2413,7 +2418,7 @@ function driveCard() {
    <li>Oluşan <span class="mono">…apps.googleusercontent.com</span> ile biten kimliği kopyalayıp yukarıdaki kutuya yapıştır, "Drive'a bağlan"a bas.</li>
    <li>Google "doğrulanmamış uygulama" uyarısı gösterirse: <b>Gelişmiş › Multifidus Tez'e git</b>. Uygulamayı yalnızca sen kullandığın için bu normaldir.</li></ol></details></div>`;
 }
-setTimeout(() => drvBadge(), 0);
+setTimeout(() => { drvBadge(); try { if (drvCfg().spss !== spssHash() && Object.keys(spssData()).length) drvSchedule(); } catch (x) { } }, 0);
 
 load(); render(); window.addEventListener('hashchange', () => { window.scrollTo(0, 0); render(); }); initCaps();
 </script><script>if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost"||location.hostname==="127.0.0.1"))navigator.serviceWorker.register("sw.js").catch(()=>{})</script>
