@@ -1,6 +1,6 @@
 // Tez Rehberi — çevrimdışı çalışma (service worker)
 // Sayfalar değişince C'deki sürümü bir artır; eski önbellek kendiliğinden silinir.
-const C='tez-rehberi-v2';
+const C='tez-rehberi-v3';
 const YEREL=["./tez-asistani.html", "./", "./spss-rehberi.html", "./SPSS-Tez-Rehberi-Claudesuz.html", "./manifest.json", "./spss-rehberi.webmanifest", "./icon-tez-192.png", "./icon-spss-192.png"];
 const CDN=["https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js", "https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js", "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js", "https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js", "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js", "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>Promise.all([
