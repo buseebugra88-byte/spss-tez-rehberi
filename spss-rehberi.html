@@ -482,7 +482,7 @@ dl.gloss dd{margin:4px 0 0;font-size:14px;color:var(--muted)}
         <h2>SPSS çıktın</h2>
         <div class="field">
           <label for="outCtx">Hangi analiz, hangi hipotez?</label>
-          <input type="text" id="outCtx" placeholder="ör. H2: iki grubun 8. hafta ODI skorları, Mann-Whitney U">
+          <input type="text" id="outCtx" placeholder="ör. H2: iki grubun 6. hafta WOMAC skorları, Mann-Whitney U">
         </div>
         <div class="field">
           <label for="outText">Çıktıyı yapıştır</label>
@@ -592,7 +592,7 @@ dl.gloss dd{margin:4px 0 0;font-size:14px;color:var(--muted)}
           </div>
           <div class="field">
             <label for="tblDesc">Gruplar / zamanlar</label>
-            <input type="text" id="tblDesc" placeholder="ör. MKE (n=20), Kontrol (n=20)">
+            <input type="text" id="tblDesc" placeholder="ör. DE (n=20), Kontrol (n=20)">
           </div>
         </div>
         <div class="btns">
@@ -687,10 +687,10 @@ dl.gloss dd{margin:4px 0 0;font-size:14px;color:var(--muted)}
             <div class="field"><label for="wz_grp">Grup değişkeni</label><input type="text" id="wz_grp" placeholder="grup"></div>
             <div class="field"><label for="wz_dv">Bağımlı değişken</label><input type="text" id="wz_dv" placeholder="VAS_8"></div>
             <div class="field"><label for="wz_times">Ölçüm sütunları (sırayla)</label><input type="text" id="wz_times" placeholder="VAS_0 VAS_4 VAS_8"></div>
-            <div class="field"><label for="wz_x">X / yordayıcılar</label><input type="text" id="wz_x" placeholder="multifidus_degisim"></div>
+            <div class="field"><label for="wz_x">X / yordayıcılar</label><input type="text" id="wz_x" placeholder="kuvvet_degisim"></div>
             <div class="field"><label for="wz_y">Y / sonuç</label><input type="text" id="wz_y" placeholder="ODI_degisim"></div>
           </div>
-          <div class="field"><label for="wz_hname">Bu hangi hipotez?</label><input type="text" id="wz_hname" placeholder="ör. H1: 8. haftada VAS gruplar arası fark"></div>
+          <div class="field"><label for="wz_hname">Bu hangi hipotez?</label><input type="text" id="wz_hname" placeholder="ör. H1: 6. haftada VAS gruplar arası fark"></div>
           <div class="btns"><button class="primary" id="wzAdd" type="button">Planıma ekle</button></div>
         </div>
       </div>
@@ -718,7 +718,7 @@ dl.gloss dd{margin:4px 0 0;font-size:14px;color:var(--muted)}
         </div>
         <div class="field">
           <label for="hypNew">Hipotez ekle (testi sonra seçebilirsin)</label>
-          <div class="btns" style="flex-wrap:nowrap"><input type="text" id="hypNew" placeholder="ör. H3: multifidus değişimi ile ODI değişimi ilişkisi"><button class="ghost small" id="hypAdd" type="button">Ekle</button></div>
+          <div class="btns" style="flex-wrap:nowrap"><input type="text" id="hypNew" placeholder="ör. H3: kuvvet değişimi ile WOMAC değişimi ilişkisi"><button class="ghost small" id="hypAdd" type="button">Ekle</button></div>
         </div>
       </div>
       <div class="panel sheet">
@@ -849,7 +849,7 @@ dl.gloss dd{margin:4px 0 0;font-size:14px;color:var(--muted)}
           <div class="field"><label for="tHdr">Başlık satırı sayısı</label><select id="tHdr"><option value="1">1</option><option value="2">2 (üst başlıklı)</option></select></div>
         </div>
         <div class="field"><label for="tTitle">Tablo başlığı</label><input type="text" id="tTitle" placeholder="ör. Grupların Başlangıç Demografik ve Klinik Özellikleri"></div>
-        <div class="field"><label for="tNote">Not (kısaltmalar, testler)</label><textarea id="tNote" style="min-height:70px" placeholder="ör. MKE = motor kontrol egzersizi; VAS = Görsel Analog Skala. Gruplar arası karşılaştırma Mann–Whitney U testi ile yapılmıştır."></textarea></div>
+        <div class="field"><label for="tNote">Not (kısaltmalar, testler)</label><textarea id="tNote" style="min-height:70px" placeholder="ör. DE = denetimli egzersiz; VAS = Görsel Analog Skala. Gruplar arası karşılaştırma Mann–Whitney U testi ile yapılmıştır."></textarea></div>
         <div class="row2">
           <div class="field"><label for="tDec">Ondalık basamak</label><select id="tDec"><option>1</option><option selected>2</option><option>3</option></select></div>
           <div class="field"><label for="tFont">Yazı tipi (Word)</label><select id="tFont"><option value="Times New Roman|24">Times New Roman 12</option><option value="Times New Roman|22">Times New Roman 11</option><option value="Calibri|22">Calibri 11</option><option value="Arial|20">Arial 10</option></select></div>
@@ -1094,14 +1094,14 @@ function summarizeWorkbook(wb,fname){
 }
 $("loadExample").addEventListener("click",()=>{
   $("studyText").value=`[ÖRNEK ÇALIŞMA — kendi çalışmanla değiştir]
-Amaç: Kronik nonspesifik bel ağrılı bireylerde 8 haftalık motor kontrol egzersizlerinin (MKE), konvansiyonel egzersizlere göre ağrı, özürlülük ve lomber multifidus kas kalınlığı üzerine etkisini incelemek.
-Tasarım: Randomize kontrollü çalışma. MKE grubu (n=20) ve kontrol grubu (konvansiyonel egzersiz, n=20).
-Ölçüm zamanları: Başlangıç, 4. hafta, 8. hafta.
-Değerlendirmeler: Ağrı – VAS (0–10 cm); Özürlülük – Oswestry Özürlülük İndeksi (ODI, %); Multifidus kalınlığı – USG ile L4–L5 seviyesinde istirahat ve kontraksiyon (mm); Demografik: yaş, cinsiyet, VKİ, ağrı süresi (ay).
+Amaç: Diz osteoartritli bireylerde 6 haftalık denetimli egzersiz programının (DE), ev egzersiz programına göre ağrı, fonksiyon ve quadriceps kas kuvveti üzerine etkisini incelemek.
+Tasarım: Randomize kontrollü çalışma. DE grubu (n=20) ve kontrol grubu (ev egzersiz programı, n=20).
+Ölçüm zamanları: Başlangıç, 3. hafta, 6. hafta.
+Değerlendirmeler: Ağrı – VAS (0–10 cm); Fonksiyon – WOMAC toplam puanı; Quadriceps kuvveti – el dinamometresi ile izometrik (kg); Demografik: yaş, cinsiyet, VKİ, semptom süresi (ay).
 Hipotezler:
-H1: 8. haftada MKE grubunun VAS skorları kontrol grubundan daha düşüktür.
-H2: Her iki grupta ODI skorları zamanla azalır ve azalma MKE grubunda daha fazladır (grup × zaman etkileşimi).
-H3: Multifidus kalınlığındaki değişim ile ODI değişimi arasında ilişki vardır.`;
+H1: 6. haftada DE grubunun VAS skorları kontrol grubundan daha düşüktür.
+H2: Her iki grupta WOMAC skorları zamanla azalır ve azalma DE grubunda daha fazladır (grup × zaman etkileşimi).
+H3: Quadriceps kuvvetindeki değişim ile WOMAC değişimi arasında ilişki vardır.`;
   $("nSize").value=40; store.set("spss.d.studyText",$("studyText").value);
 });
 
@@ -1630,7 +1630,7 @@ kw:{name:"Kruskal–Wallis H testi",why:"Üç veya daha fazla bağımsız grubu 
  read:["**Hypothesis Test Summary**: Sig. < .05 ise gruplardan en az biri farklı.","Model Viewer → **Independent-Samples Kruskal-Wallis Test**: H (Test Statistic), df.","**Pairwise Comparisons**: **Adj. Sig.** < .05 olan ikililer farklı."],
  effect:"η²<sub>H</sub> = (H − k + 1) / (n − k) ya da ε² = H / (n − 1): .01 küçük, .06 orta, .14 büyük (Tomczak ve Tomczak, 2014).",
  apa:"Gruplar arasında [değişken] açısından anlamlı fark bulundu, *H*([sd]) = [H], *p* = [p], η²<sub>H</sub> = [ ]. Bonferroni düzeltmeli ikili karşılaştırmalarda [A] ile [B] arasında fark anlamlıydı (*p*<sub>düz</sub> = [ ]).",alt:"anova1"},
-rmAnova:{name:"Tekrarlı ölçümler ANOVA",why:"Aynı kişilerin 3 veya daha fazla zamanda ölçülen değerlerini karşılaştırır (ör. başlangıç, 4. ve 8. hafta). Her ölçüm normal dağıldığında kullanılır.",
+rmAnova:{name:"Tekrarlı ölçümler ANOVA",why:"Aynı kişilerin 3 veya daha fazla zamanda ölçülen değerlerini karşılaştırır (ör. başlangıç, 3. ve 6. hafta). Her ölçüm normal dağıldığında kullanılır.",
  where:"Analyze → General Linear Model → Repeated Measures",
  steps:["**Analyze** → **General Linear Model** → **Repeated Measures**'ı seç.","**Within-Subject Factor Name**'e *zaman* yaz, **Number of Levels**'a ölçüm sayısını ({k}) yaz, **Add**, sonra **Define**.","Ölçüm sütunlarını (*{times}*) sırasıyla **Within-Subjects Variables** kutusuna taşı.","**EM Means** → *zaman*'ı sağa taşı, **Compare main effects**'i işaretle, **Confidence interval adjustment**: **Bonferroni**, **Continue**.","**Options** → **Descriptive statistics** ve **Estimates of effect size**'ı işaretle, **Continue**.","**Plots** → *zaman*'ı Horizontal Axis'e taşı, **Add**, **Continue** (isteğe bağlı).","**OK**."],
  careful:["Mauchly küresellik testi anlamlıysa (p < .05) **Greenhouse–Geisser** satırını oku.","Multivariate Tests tablosunu değil, **Tests of Within-Subjects Effects** tablosunu raporla (genel yaklaşım).","Ölçümleri doğru sırayla eşleştir: ilk kutu 1. ölçüm olmalı."],
@@ -1653,7 +1653,7 @@ mixed:{name:"Karma desen (iki yönlü tekrarlı ölçümler) ANOVA",why:"İki ve
  syntax:"GLM {times} BY {grp}\n  /WSFACTOR=zaman {k} Polynomial\n  /METHOD=SSTYPE(3)\n  /PLOT=PROFILE(zaman*{grp})\n  /EMMEANS=TABLES({grp}*zaman) COMPARE({grp}) ADJ(BONFERRONI)\n  /EMMEANS=TABLES({grp}*zaman) COMPARE(zaman) ADJ(BONFERRONI)\n  /PRINT=DESCRIPTIVE ETASQ HOMOGENEITY\n  /CRITERIA=ALPHA(.05)\n  /WSDESIGN=zaman\n  /DESIGN={grp}.",
  read:["**Mauchly's Test of Sphericity** → hangi satırı okuyacağın.","**Tests of Within-Subjects Effects** → **zaman × {grp}** satırı (SPSS'te zaman ✱ {grp} diye yazar): etkileşim F, Sig., Partial Eta Squared. Aynı tabloda *zaman* satırı = zaman ana etkisi.","**Tests of Between-Subjects Effects** → *{grp}* satırı: grup ana etkisi.","**Pairwise Comparisons** (COMPARE({grp})): her zaman noktasında gruplar arası fark; (COMPARE(zaman)): her grupta zamanlar arası fark.","**Profile Plots**: çizgiler birbirinden ayrılıyorsa etkileşim vardır."],
  effect:"Kısmi η²: .01 küçük, .06 orta, .14 büyük.",
- apa:"[Değişken] için anlamlı bir grup × zaman etkileşimi bulundu, *F*([sd1], [sd2]) = [F], *p* = [p], η²<sub>p</sub> = [ ]. Bonferroni düzeltmeli karşılaştırmalara göre [8. haftada] [A] grubunun değerleri [B] grubundan anlamlı düzeyde [daha düşüktü] (*p* = [ ]).",alt:"mixedNP"},
+ apa:"[Değişken] için anlamlı bir grup × zaman etkileşimi bulundu, *F*([sd1], [sd2]) = [F], *p* = [p], η²<sub>p</sub> = [ ]. Bonferroni düzeltmeli karşılaştırmalara göre [6. haftada] [A] grubunun değerleri [B] grubundan anlamlı düzeyde [daha düşüktü] (*p* = [ ]).",alt:"mixedNP"},
 mixedNP:{name:"Grup × zaman, parametrik olmayan yaklaşım",why:"Karma ANOVA'nın doğrudan parametrik olmayan karşılığı SPSS'te yoktur. Yaygın yaklaşım: her grubun kendi içindeki değişimi Friedman (3+ ölçüm) ya da Wilcoxon (2 ölçüm) ile, gruplar arası fark ise her zaman noktasında ya da değişim (fark) skorlarında Mann–Whitney U ile test edilir. Bonferroni düzeltmesi yapılır.",
  where:"Data → Split File, ardından Nonparametric Tests",
  steps:["Grup içi analiz için **Data** → **Split File** → **Compare groups** seç, *{grp}*'yi **Groups Based on**'a taşı, **OK**.","Ölçüm sayısı 2 ise Wilcoxon, 3+ ise Friedman testini (sihirbazdaki ilgili kartlar) çalıştır. Sonuçlar her grup için ayrı gelir.","Bitince **Data** → **Split File** → **Analyze all cases, do not create groups**, **OK** ile bölmeyi kapat.","Gruplar arası için **Transform** → **Compute Variable** ile değişim skoru oluştur (ör. *degisim = son − ilk*).","Değişim skorunu (ve istersen her zaman noktasını) Mann–Whitney U ile karşılaştır.","Yaptığın karşılaştırma sayısına göre Bonferroni düzeltilmiş α kullan."],
@@ -1701,7 +1701,7 @@ spearman:{name:"Spearman sıra korelasyonu",why:"İki değişken arasındaki ili
  read:["**Correlations** tablosu: Correlation Coefficient (ρ), Sig. (2-tailed), N."],
  effect:"ρ için de .10 zayıf, .30 orta, .50 güçlü.",
  apa:"[X] ile [Y] arasında [negatif] yönde, [orta] düzeyde anlamlı bir ilişki bulundu, *r*<sub>s</sub> = [ ], *p* = [p].",alt:"pearson"},
-linreg:{name:"Çoklu doğrusal regresyon",why:"Sürekli bir sonuç değişkenini (ör. ODI) birden çok değişkenle (ör. yaş, ağrı süresi, multifidus kalınlığı) yordamak ve her birinin katkısını görmek için kullanılır.",
+linreg:{name:"Çoklu doğrusal regresyon",why:"Sürekli bir sonuç değişkenini (ör. WOMAC) birden çok değişkenle (ör. yaş, semptom süresi, quadriceps kuvveti) yordamak ve her birinin katkısını görmek için kullanılır.",
  where:"Analyze → Regression → Linear",
  steps:["**Analyze** → **Regression** → **Linear**'ı seç.","Sonuç değişkenini (*{y}*) **Dependent**'a, yordayıcıları (*{x}*) **Independent(s)**'a taşı. **Method: Enter**.","**Statistics** → **Estimates**, **Confidence intervals**, **Model fit**, **Collinearity diagnostics**, **Durbin-Watson**'u işaretle, **Continue**.","**Plots** → *ZRESID*'i Y'ye, *ZPRED*'i X'e taşı; **Histogram** ve **Normal probability plot**'u işaretle, **Continue**.","**OK**."],
  careful:["Kategorik yordayıcılar 0/1 (dummy) olarak kodlanmalı.","Her yordayıcı için yeterli gözlem olmalı (kabaca 10–15 kişi/yordayıcı).","VIF > 5–10 çoklu bağlantı sorununa işaret eder.","Durbin–Watson 1.5–2.5 aralığında olmalı."],
@@ -1717,7 +1717,7 @@ logreg:{name:"İkili lojistik regresyon",why:"İki kategorili bir sonucu (ör. i
  read:["**Omnibus Tests of Model Coefficients**: modelin anlamlılığı.","**Model Summary**: Nagelkerke R².","**Hosmer and Lemeshow Test**: Sig. ≥ .05 ise uyum iyi.","**Variables in the Equation**: Exp(B) = OR, %95 GA, Sig."],
  effect:"Odds oranı (OR) ve %95 GA.",
  apa:"[X], [olayın] olasılığını anlamlı düzeyde artırdı, OR = [ ], %95 GA [ , ], *p* = [p]. Model uyumu yeterliydi (Hosmer–Lemeshow *p* = [ ]; Nagelkerke *R*² = [ ]).",alt:"linreg"},
-icc:{name:"Sınıf içi korelasyon katsayısı (ICC)",why:"Aynı ölçümün tekrarlanabilirliğini (test–tekrar test) ya da farklı değerlendiriciler arasındaki uyumu (ör. iki fizyoterapistin USG ölçümü) gösterir.",
+icc:{name:"Sınıf içi korelasyon katsayısı (ICC)",why:"Aynı ölçümün tekrarlanabilirliğini (test–tekrar test) ya da farklı değerlendiriciler arasındaki uyumu (ör. iki fizyoterapistin dinamometre ölçümü) gösterir.",
  where:"Analyze → Scale → Reliability Analysis",
  steps:["**Analyze** → **Scale** → **Reliability Analysis**'i seç.","Tekrarlı ölçüm ya da değerlendirici sütunlarını (*{times}*) **Items**'a taşı.","**Statistics** → **Intraclass correlation coefficient**'i işaretle.","**Model**: test–tekrar test ve belirli değerlendiriciler için **Two-Way Mixed**; değerlendiriciler daha geniş bir havuzu temsil ediyorsa **Two-Way Random**. **Type**: **Absolute Agreement**. **Confidence interval**: 95. **Continue**.","**OK**."],
  careful:["Hangi ICC modelini seçtiğini yöntemde yaz: ör. ICC(3,1), iki yönlü karma, mutlak uyum, tek ölçüm.","Klinikte tek ölçüm kullanılacaksa **Single Measures** satırını, ortalama kullanılacaksa **Average Measures** satırını raporla.","ICC'nin yanında %95 GA'yı mutlaka ver; yorumu GA'nın alt sınırına göre yapmak daha güvenlidir."],
@@ -1738,11 +1738,11 @@ alpha:{name:"Cronbach alfa (iç tutarlılık)",why:"Bir ölçeğin maddelerinin 
 const WQ = {
   start:{q:"Ne yapmak istiyorsun?",opts:[["compare","Grupları ya da ölçümleri karşılaştırmak (fark var mı?)"],["relate","İki değişken arasındaki ilişkiyi bulmak"],["cat","İki kategorik değişkenin ilişkisini incelemek (ör. grup × cinsiyet)"],["predict","Bir sonucu başka değişkenlerle yordamak"],["rel","Ölçümün ya da ölçeğin güvenirliğini test etmek"]]},
   compare:{q:"Çalışma düzenin nasıl?",opts:[["ind2","2 ayrı grup (ör. deney–kontrol), tek zaman noktası"],["ind3","3 veya daha fazla ayrı grup, tek zaman noktası"],["rep2","Aynı kişiler, 2 ölçüm (ön test – son test)"],["rep3","Aynı kişiler, 3 veya daha fazla ölçüm"],["mixed","2+ grup ve her grupta 2+ ölçüm (grup × zaman)"]]},
-  dv:{q:"Karşılaştırdığın değişken ne tür?",opts:[["cont","Sürekli sayısal (VAS cm, ODI %, açı, kuvvet, mm)"],["ord","Sıralı (Likert maddesi, 0–5 kas testi gibi)"],["catv","Kategorik (var/yok, iyileşti/iyileşmedi)"]]},
+  dv:{q:"Karşılaştırdığın değişken ne tür?",opts:[["cont","Sürekli sayısal (VAS cm, WOMAC puanı, açı, kuvvet, mm)"],["ord","Sıralı (Likert maddesi, 0–5 kas testi gibi)"],["catv","Kategorik (var/yok, iyileşti/iyileşmedi)"]]},
   norm:{q:"Veri normal dağılıyor mu? (Her grupta / fark skorunda)",opts:[["yes","Evet, normallik testim ve grafiklerim uygun"],["no","Hayır, normal dağılmıyor"],["dk","Bilmiyorum, nasıl bakacağımı göster"]]},
   relate:{q:"İki değişken de sürekli ve normal dağılıyor mu?",opts:[["yes","Evet, ikisi de sürekli ve normal"],["no","Hayır ya da biri sıralı ölçekte"],["dk","Bilmiyorum"]]},
   cat:{q:"Kategorik değişkenler nasıl ölçüldü?",opts:[["indep","Farklı kişiler (ör. gruplar arasında cinsiyet dağılımı)"],["paired","Aynı kişiler, öncesi ve sonrası"],["paired3","Aynı kişiler, 3 veya daha fazla zaman"]]},
-  predict:{q:"Yordamak istediğin sonuç değişkeni ne tür?",opts:[["cont","Sürekli (ör. ODI puanı)"],["bin","İki kategorili (ör. iyileşti / iyileşmedi)"]]},
+  predict:{q:"Yordamak istediğin sonuç değişkeni ne tür?",opts:[["cont","Sürekli (ör. WOMAC puanı)"],["bin","İki kategorili (ör. iyileşti / iyileşmedi)"]]},
   rel:{q:"Neyin güvenirliğini test ediyorsun?",opts:[["icc","Aynı ölçümün tekrarı ya da değerlendiriciler arası uyum (sürekli ölçüm)"],["alpha","Bir ölçeğin maddelerinin iç tutarlılığı"]]},
 };
 let wPath=[];
@@ -1873,7 +1873,7 @@ function lz(x,d=2){return isFinite(x)?(Math.abs(x)<1?x.toFixed(d).replace(/^(-?)
 const T=(lang,tr,en)=>lang==="en"?en:tr;
 const SIZE={tr:["önemsiz","küçük","orta","büyük"],en:["negligible","small","medium","large"]};
 const RES={
- indT:{f:[["dv","Değişken adı","VAS"],["g1","1. grup adı","MKE"],["g2","2. grup adı","kontrol"],["m1","1. grup ortalama"],["s1","1. grup SS"],["n1","1. grup n"],["m2","2. grup ortalama"],["s2","2. grup SS"],["n2","2. grup n"],["t","t"],["df","df"],["p","Sig. (2-tailed)"],["welch","Levene p < .05 (Equal variances not assumed satırı)","check"]],
+ indT:{f:[["dv","Değişken adı","VAS"],["g1","1. grup adı","DE"],["g2","2. grup adı","kontrol"],["m1","1. grup ortalama"],["s1","1. grup SS"],["n1","1. grup n"],["m2","2. grup ortalama"],["s2","2. grup SS"],["n2","2. grup n"],["t","t"],["df","df"],["p","Sig. (2-tailed)"],["welch","Levene p < .05 (Equal variances not assumed satırı)","check"]],
   where:"Group Statistics ve Independent Samples Test tablolarından. Levene'e göre doğru satırı oku.",
   gen:(v,L,a)=>{const sp=Math.sqrt(((v.n1-1)*v.s1**2+(v.n2-1)*v.s2**2)/(v.n1+v.n2-2));const d=(v.m1-v.m2)/sp;const sig=v.p<a;const hi=v.m1>v.m2;
    const stat=`*t*(${nTxt(v.df,v.welch?2:0)}) = ${nTxt(v.t)}, ${pTxt(v.p)}, *d* = ${lz(Math.abs(d))}`;
@@ -1884,7 +1884,7 @@ const RES={
      `There was no significant difference in ${v.dv} between the ${v.g1} (*M* = ${nTxt(v.m1)}, *SD* = ${nTxt(v.s1)}) and ${v.g2} (*M* = ${nTxt(v.m2)}, *SD* = ${nTxt(v.s2)}) groups, ${stat}.${w}`);
    return{sig,es:["Cohen d",Math.abs(d),[.2,.5,.8]],rows:[["Ortalama fark",nTxt(v.m1-v.m2)],["Birleştirilmiş SS",nTxt(sp)]],para,
     plain:`${sig?"Gruplar arasındaki fark büyük olasılıkla şansa bağlı değil":"Gruplar arasında şansla açıklanamayacak bir fark gösterilemedi"}: p ${v.p<.001?"< .001":"= "+v.p.toFixed(3)}, α = ${a}. Cohen d farkın büyüklüğünü SS cinsinden verir: ${lz(Math.abs(d))} demek, iki grubun ortalamaları arasında ${nTxt(Math.abs(d))} standart sapma fark var demek.`};}},
- mw:{f:[["dv","Değişken adı","VAS"],["g1","1. grup adı","MKE"],["g2","2. grup adı","kontrol"],["md1","1. grup medyan"],["iqr1","1. grup ÇAA ya da Q1–Q3","2.10–4.30"],["md2","2. grup medyan"],["iqr2","2. grup ÇAA ya da Q1–Q3"],["u","Mann-Whitney U"],["z","Z"],["p","Asymp. Sig. (2-tailed)"],["n","Toplam N"]],
+ mw:{f:[["dv","Değişken adı","VAS"],["g1","1. grup adı","DE"],["g2","2. grup adı","kontrol"],["md1","1. grup medyan"],["iqr1","1. grup ÇAA ya da Q1–Q3","2.10–4.30"],["md2","2. grup medyan"],["iqr2","2. grup ÇAA ya da Q1–Q3"],["u","Mann-Whitney U"],["z","Z"],["p","Asymp. Sig. (2-tailed)"],["n","Toplam N"]],
   where:"Test Statistics tablosundan U, Z, p; medyan ve çeyrekler için Explore (gruplara göre).",
   gen:(v,L,a)=>{const r=Math.abs(v.z)/Math.sqrt(v.n);const sig=v.p<a;const hi=v.md1>v.md2;const I=T(L,"ÇAA","IQR");
    const stat=`*U* = ${nTxt(v.u,v.u%1?2:0)}, *Z* = ${nTxt(v.z)}, ${pTxt(v.p)}, *r* = ${lz(r)}`;
@@ -1893,7 +1893,7 @@ const RES={
     :T(L,`${v.g1} (Mdn = ${nTxt(v.md1)}, ${I} = ${v.iqr1||"[ ]"}) ve ${v.g2} (Mdn = ${nTxt(v.md2)}, ${I} = ${v.iqr2||"[ ]"}) grupları arasında ${v.dv} açısından anlamlı fark bulunmadı, ${stat}.`,
      `${v.dv} did not differ significantly between the ${v.g1} (Mdn = ${nTxt(v.md1)}, ${I} = ${v.iqr1||"[ ]"}) and ${v.g2} (Mdn = ${nTxt(v.md2)}, ${I} = ${v.iqr2||"[ ]"}) groups, ${stat}.`);
    return{sig,es:["r",r,[.1,.3,.5]],rows:[],para,plain:`Mann–Whitney ortalamalara değil sıralara bakar; bu yüzden medyan raporlanır. r = |Z|/√N = ${lz(r)}; .10 küçük, .30 orta, .50 büyük etki demektir.`};}},
- pairedT:{f:[["dv","Değişken adı","ODI"],["l1","1. ölçüm adı","tedavi öncesi"],["l2","2. ölçüm adı","tedavi sonrası"],["m1","1. ölçüm ortalama"],["s1","1. ölçüm SS"],["m2","2. ölçüm ortalama"],["s2","2. ölçüm SS"],["t","t"],["df","df"],["p","Sig. (2-tailed)"],["n","n (çift)"],["lo","Farkın %95 GA alt (isteğe bağlı)"],["hi","Farkın %95 GA üst (isteğe bağlı)"]],
+ pairedT:{f:[["dv","Değişken adı","WOMAC"],["l1","1. ölçüm adı","tedavi öncesi"],["l2","2. ölçüm adı","tedavi sonrası"],["m1","1. ölçüm ortalama"],["s1","1. ölçüm SS"],["m2","2. ölçüm ortalama"],["s2","2. ölçüm SS"],["t","t"],["df","df"],["p","Sig. (2-tailed)"],["n","n (çift)"],["lo","Farkın %95 GA alt (isteğe bağlı)"],["hi","Farkın %95 GA üst (isteğe bağlı)"]],
   where:"Paired Samples Statistics ve Paired Samples Test tablolarından.",
   gen:(v,L,a)=>{const dz=Math.abs(v.t)/Math.sqrt(v.n);const sig=v.p<a;const dec=v.m2<v.m1;const ci=isFinite(v.lo)&&isFinite(v.hi)?T(L,`, %95 GA [${nTxt(v.lo)}, ${nTxt(v.hi)}]`,`, 95% CI [${nTxt(v.lo)}, ${nTxt(v.hi)}]`):"";
    const stat=`*t*(${nTxt(v.df,0)}) = ${nTxt(v.t)}, ${pTxt(v.p)}, *d*<sub>z</sub> = ${lz(dz)}${ci}`;
@@ -1931,7 +1931,7 @@ const RES={
    const ph=sig&&v.ph?T(L,` Bonferroni düzeltmeli karşılaştırmalarda ${v.ph}.`,` Bonferroni-adjusted comparisons showed that ${v.ph}.`):"";
    const para=sig?T(L,`${v.dv} değerlerinde zaman içinde istatistiksel olarak anlamlı değişim bulundu, ${stat}.${gg}${ph}`,`${v.dv} changed significantly over time, ${stat}.${gg}${ph}`):T(L,`${v.dv} değerlerinde zaman içinde anlamlı değişim bulunmadı, ${stat}.${gg}`,`${v.dv} did not change significantly over time, ${stat}.${gg}`);
    return{sig,es:["η²p",e,[.01,.06,.14]],rows:[],para,plain:"Greenhouse–Geisser satırında df değerleri ondalıklı olur; onları da aynen yaz."};}},
- mixed:{f:[["dv","Değişken adı","VAS"],["f","Etkileşim F (zaman × grup)"],["df1","Etkileşim df"],["df2","Hata df"],["p","Etkileşim Sig."],["gg","Greenhouse–Geisser satırı kullanıldı","check"],["ft","Zaman ana etkisi F (isteğe bağlı)"],["pt","Zaman Sig. (isteğe bağlı)"],["fg","Grup ana etkisi F (isteğe bağlı)"],["dfg","Grup df2 (isteğe bağlı)"],["pg","Grup Sig. (isteğe bağlı)"],["ph","Ayrıntı (isteğe bağlı)","ör. 8. haftada MKE grubunun değerleri daha düşüktü (p = .004)"]],
+ mixed:{f:[["dv","Değişken adı","VAS"],["f","Etkileşim F (zaman × grup)"],["df1","Etkileşim df"],["df2","Hata df"],["p","Etkileşim Sig."],["gg","Greenhouse–Geisser satırı kullanıldı","check"],["ft","Zaman ana etkisi F (isteğe bağlı)"],["pt","Zaman Sig. (isteğe bağlı)"],["fg","Grup ana etkisi F (isteğe bağlı)"],["dfg","Grup df2 (isteğe bağlı)"],["pg","Grup Sig. (isteğe bağlı)"],["ph","Ayrıntı (isteğe bağlı)","ör. 6. haftada DE grubunun değerleri daha düşüktü (p = .004)"]],
   where:"Tests of Within-Subjects Effects (zaman ve zaman × grup satırları), Tests of Between-Subjects Effects (grup satırı), Pairwise Comparisons.",
   gen:(v,L,a)=>{const e=v.f*v.df1/(v.f*v.df1+v.df2);const sig=v.p<a;const d=v.gg?2:0;
    const stat=`*F*(${nTxt(v.df1,d)}, ${nTxt(v.df2,d)}) = ${nTxt(v.f)}, ${pTxt(v.p)}, η²<sub>p</sub> = ${lz(e,3)}`;
@@ -1955,7 +1955,7 @@ const RES={
    const para=sig?T(L,`Gruplar arasında ${v.dv} dağılımı açısından istatistiksel olarak anlamlı fark bulundu (${stat}).`,`The distribution of ${v.dv} differed significantly between groups (${stat}).`):T(L,`Gruplar ${v.dv} dağılımı açısından benzerdi (${stat}).`,`The groups were similar in terms of ${v.dv} (${stat}).`);
    const cuts={1:[.1,.3,.5],2:[.07,.21,.35],3:[.06,.17,.29]}[Math.min(m,3)]||[.05,.15,.25];
    return{sig,es:[m===1?"φ":"Cramér V",V,cuts],rows:[],para,plain:"Demografik tabloda bu testin anlamlı çıkmaması istenir: grupların başlangıçta benzer olduğunu gösterir."};}},
- corr:{f:[["x","1. değişken","multifidus kalınlık değişimi"],["y","2. değişken","ODI değişimi"],["kind","Pearson / Spearman","select:pearson|Pearson,spearman|Spearman"],["r","Correlation Coefficient"],["p","Sig. (2-tailed)"],["n","N"]],
+ corr:{f:[["x","1. değişken","quadriceps kuvvet değişimi"],["y","2. değişken","WOMAC değişimi"],["kind","Pearson / Spearman","select:pearson|Pearson,spearman|Spearman"],["r","Correlation Coefficient"],["p","Sig. (2-tailed)"],["n","N"]],
   where:"Correlations tablosu.",
   gen:(v,L,a)=>{const sig=v.p<a;const s=v.kind==="spearman"?"*r*<sub>s</sub>":"*r*";const neg=v.r<0;const st=Math.abs(v.r);
    const lv=T(L,st>=.5?"güçlü":st>=.3?"orta":st>=.1?"zayıf":"çok zayıf",st>=.5?"strong":st>=.3?"moderate":st>=.1?"weak":"negligible");
@@ -1963,7 +1963,7 @@ const RES={
    const para=sig?T(L,`${v.x} ile ${v.y} arasında ${neg?"negatif":"pozitif"} yönde, ${lv} düzeyde ve istatistiksel olarak anlamlı bir ilişki bulundu, ${stat}.`,`There was a significant ${lv} ${neg?"negative":"positive"} correlation between ${v.x} and ${v.y}, ${stat}.`)
     :T(L,`${v.x} ile ${v.y} arasında anlamlı bir ilişki bulunmadı, ${stat}.`,`There was no significant correlation between ${v.x} and ${v.y}, ${stat}.`);
    return{sig,es:[v.kind==="spearman"?"ρ":"r",Math.abs(v.r),[.1,.3,.5]],rows:[["r² (ortak varyans)",`%${nTxt(v.r*v.r*100,1)}`]],para,plain:`${neg?"Negatif ilişki: biri artarken diğeri azalıyor.":"Pozitif ilişki: ikisi birlikte artıyor."} Korelasyon neden-sonuç ilişkisi göstermez.`};}},
- icc:{f:[["dv","Ölçüm adı","L4–L5 multifidus kalınlığı"],["model","ICC modeli","ICC(3,1), iki yönlü karma, mutlak uyum"],["icc","ICC (Single Measures)"],["lo","%95 GA alt"],["hi","%95 GA üst"],["sd","Ölçümlerin SS'si (SEM için, isteğe bağlı)"],["unit","Birim","mm"]],
+ icc:{f:[["dv","Ölçüm adı","quadriceps izometrik kuvveti"],["model","ICC modeli","ICC(3,1), iki yönlü karma, mutlak uyum"],["icc","ICC (Single Measures)"],["lo","%95 GA alt"],["hi","%95 GA üst"],["sd","Ölçümlerin SS'si (SEM için, isteğe bağlı)"],["unit","Birim","mm"]],
   where:"Intraclass Correlation Coefficient tablosu, Single Measures satırı.",
   gen:(v,L,a)=>{const lab=x=>T(L,x<.5?"zayıf":x<.75?"orta":x<.9?"iyi":"mükemmel",x<.5?"poor":x<.75?"moderate":x<.9?"good":"excellent");
    const sem=isFinite(v.sd)?v.sd*Math.sqrt(1-v.icc):NaN;const mdc=1.959964*Math.SQRT2*sem;
@@ -2014,11 +2014,11 @@ $("resAlpha").addEventListener("change",()=>{store.set("spss.resalpha",$("resAlp
 drawResForm();
 
 /* ================= TABLO DÜZENLEYİCİ (Claude'suz) ================= */
-let tg=store.json("spss.tgrid",null)||[["","MKE (n = 20)","","Kontrol (n = 20)","",""],["Değişken","M","SS","M","SS","p"],["Yaş (yıl)","42.135","8.3","44.08","7.912",".412"],["VKİ (kg/m²)","25.61","3.204","26.1","2.98",".000"],["Cinsiyet, n (%)","","","","",""],["  Kadın","12 (60.0)","","11 (55.0)","",".749"]];
+let tg=store.json("spss.tgrid",null)||[["","DE (n = 20)","","Kontrol (n = 20)","",""],["Değişken","M","SS","M","SS","p"],["Yaş (yıl)","42.135","8.3","44.08","7.912",".412"],["VKİ (kg/m²)","25.61","3.204","26.1","2.98",".000"],["Cinsiyet, n (%)","","","","",""],["  Kadın","12 (60.0)","","11 (55.0)","",".749"]];
 let lastCol=0;
 ["tNo","tHdr","tTitle","tNote","tDec","tFont","tLang"].forEach(id=>{const v=store.get("spss.t."+id,null);if(v!=null)$(id).value=v;$(id).addEventListener("input",()=>{store.set("spss.t."+id,$(id).value);drawPrev();});$(id).addEventListener("change",()=>{store.set("spss.t."+id,$(id).value);drawPrev();});});
 if(!store.get("spss.t.tTitle",null))$("tTitle").value="Grupların Başlangıç Demografik Özellikleri";
-if(!store.get("spss.t.tNote",null))$("tNote").value="Not. MKE = motor kontrol egzersizi; VKİ = vücut kütle indeksi. Sürekli değişkenler bağımsız örneklem t testi, kategorik değişkenler ki-kare testi ile karşılaştırılmıştır.";
+if(!store.get("spss.t.tNote",null))$("tNote").value="Not. DE = denetimli egzersiz; VKİ = vücut kütle indeksi. Sürekli değişkenler bağımsız örneklem t testi, kategorik değişkenler ki-kare testi ile karşılaştırılmıştır.";
 if(!store.get("spss.t.tHdr",null))$("tHdr").value="2";
 function saveGrid(){store.setj("spss.tgrid",tg);drawPrev();}
 function ncol(){return Math.max(1,...tg.map(r=>r.length));}
@@ -2042,7 +2042,7 @@ function parsePaste(txt){
   return rows;
 }
 $("tLoad").addEventListener("click",()=>{const t=$("tPaste").value;if(!t.trim()){toast("Önce SPSS tablosunu yapıştır");return;}tg=parsePaste(t);$("tHdr").value="1";store.set("spss.t.tHdr","1");saveGrid();drawGrid();toast("Tabloya aktarıldı; gereksiz satırları sil");});
-$("tExample").addEventListener("click",()=>{tg=[["","MKE (n = 20)","","Kontrol (n = 20)","",""],["Değişken","M","SS","M","SS","p"],["Yaş (yıl)","42.135","8.3","44.08","7.912",".412"],["VKİ (kg/m²)","25.61","3.204","26.1","2.98",".000"],["Cinsiyet, n (%)","","","","",""],["  Kadın","12 (60.0)","","11 (55.0)","",".749"]];$("tHdr").value="2";saveGrid();drawGrid();});
+$("tExample").addEventListener("click",()=>{tg=[["","DE (n = 20)","","Kontrol (n = 20)","",""],["Değişken","M","SS","M","SS","p"],["Yaş (yıl)","42.135","8.3","44.08","7.912",".412"],["VKİ (kg/m²)","25.61","3.204","26.1","2.98",".000"],["Cinsiyet, n (%)","","","","",""],["  Kadın","12 (60.0)","","11 (55.0)","",".749"]];$("tHdr").value="2";saveGrid();drawGrid();});
 $("tAddRow").addEventListener("click",()=>{tg.push(Array(ncol()).fill(""));saveGrid();drawGrid();});
 $("tAddCol").addEventListener("click",()=>{tg.forEach(r=>r.push(""));saveGrid();drawGrid();});
 $("tDelRow").addEventListener("click",()=>{if(tg.length>1){tg.pop();saveGrid();drawGrid();}});
@@ -2120,7 +2120,7 @@ $("tDocx").addEventListener("click",async()=>{
 drawGrid();
 
 /* ================= GRAFİK (Claude'suz, canvas) ================= */
-let cd=store.json("spss.chart",{groups:[{name:"MKE",n:20},{name:"Kontrol",n:20},{name:"Grup 3",n:20},{name:"Grup 4",n:20}],times:["Başlangıç","4. hafta","8. hafta","T4","T5","T6"],
+let cd=store.json("spss.chart",{groups:[{name:"DE",n:20},{name:"Kontrol",n:20},{name:"Grup 3",n:20},{name:"Grup 4",n:20}],times:["Başlangıç","3. hafta","6. hafta","T4","T5","T6"],
   m:[[6.2,4.1,2.1,0,0,0],[6.05,4.9,3.4,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]],s:[[1.1,1.0,0.9,0,0,0],[1.3,1.2,1.2,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]],
   raw:["6.1 5.8 7.2 6.4 5.0 6.9 7.5 5.5 6.0 6.3 4.8 7.0 6.6 5.9 6.2 8.9","5.2 6.0 6.8 5.5 7.1 6.3 5.9 6.6 4.9 6.1 5.7 6.4 7.3 5.8 6.0 6.2","",""]});
 ["cType","cErr","cG","cT","cX","cY","cStyle","cFont","cNo","cTitle"].forEach(id=>{const v=store.get("spss.c."+id,null);if(v!=null)$(id).value=v;const h=()=>{store.set("spss.c."+id,$(id).value);if(["cG","cT","cType"].includes(id))drawCData();drawChart();};$(id).addEventListener("change",h);$(id).addEventListener("input",h);});
@@ -2210,7 +2210,7 @@ drawCData();drawChart();
 /* ================= CONSORT (Claude'suz, SVG) ================= */
 const KF=[["name","Grup adı","text"],["alloc","Atanan (n)"],["recv","Müdahaleyi alan (n)"],["nrecv","Almayan (n)"],["nrecvR","Almama nedenleri","text"],["lost","İzlemden kaybedilen (n)"],["lostR","Kayıp nedenleri","text"],["disc","Müdahaleyi bırakan (n)"],["discR","Bırakma nedenleri","text"],["anal","Analiz edilen (n)"],["excl","Analizden çıkarılan (n)"],["exclR","Çıkarılma nedenleri","text"]];
 let kd=store.json("spss.consort",{assess:"58",ex1:"12",ex2:"4",ex3:"2",lang:"tr",arms:[
-  {name:"MKE grubu",alloc:"20",recv:"20",nrecv:"0",nrecvR:"",lost:"1",lostR:"taşındı (n = 1)",disc:"0",discR:"",anal:"19",excl:"0",exclR:""},
+  {name:"DE grubu",alloc:"20",recv:"20",nrecv:"0",nrecvR:"",lost:"1",lostR:"taşındı (n = 1)",disc:"0",discR:"",anal:"19",excl:"0",exclR:""},
   {name:"Kontrol grubu",alloc:"20",recv:"19",nrecv:"1",nrecvR:"zaman bulamadı (n = 1)",lost:"1",lostR:"ulaşılamadı (n = 1)",disc:"0",discR:"",anal:"18",excl:"0",exclR:""}]});
 ["assess","ex1","ex2","ex3","lang"].forEach(k=>{const el=$("k_"+k);el.value=kd[k]??"";el.addEventListener("input",()=>{kd[k]=el.value;saveKd();});el.addEventListener("change",()=>{kd[k]=el.value;saveKd();});});
 function saveKd(){store.setj("spss.consort",kd);drawConsort();}
